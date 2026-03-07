@@ -39,13 +39,17 @@ export default class RBTNode implements RBOptions {
     this.color = false;
   }
 
-  getSibling(): RBTNode | null {
-    if (!this.parent) return null;
+  isRoot(): boolean {
+    return !this.parent;
+  }
 
-    if (this === this.parent.left) {
-      return this.parent.right;
+  getSibling(): RBTNode | null {
+    if (this.isRoot()) return null;
+
+    if (this === this.parent!.left) {
+      return this.parent!.right;
     } else {
-      return this.parent.left;
+      return this.parent!.left;
     }
   }
 
