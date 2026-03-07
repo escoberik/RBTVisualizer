@@ -55,6 +55,8 @@ export default function TreeVisualizer() {
         onPrev={moveBack}
         onFirst={moveFirst}
         onLast={moveLast}
+        isFirst={index.current === 0}
+        isLast={index.current === history.current.length - 1}
       />
     </div>
   );

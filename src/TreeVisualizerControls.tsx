@@ -12,12 +12,16 @@ export default function TreeVisualizerControls({
   onPrev,
   onFirst,
   onLast,
+  isFirst,
+  isLast,
 }: {
   onInsert: (value: number) => void;
   onNext: () => void;
   onPrev: () => void;
   onFirst: () => void;
   onLast: () => void;
+  isFirst: boolean;
+  isLast: boolean;
 }) {
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -62,16 +66,16 @@ export default function TreeVisualizerControls({
         <button>Delete</button>
       </div>
       <div className="controls-nav">
-        <button title="First step" onClick={onFirst}>
+        <button title="First step" onClick={onFirst} disabled={isFirst}>
           <SkipFirstIcon />
         </button>
-        <button title="Previous step" onClick={onPrev}>
+        <button title="Previous step" onClick={onPrev} disabled={isFirst}>
           <StepBackIcon />
         </button>
-        <button title="Next step" onClick={onNext}>
+        <button title="Next step" onClick={onNext} disabled={isLast}>
           <StepForwardIcon />
         </button>
-        <button title="Last step" onClick={onLast}>
+        <button title="Last step" onClick={onLast} disabled={isLast}>
           <SkipLastIcon />
         </button>
       </div>
