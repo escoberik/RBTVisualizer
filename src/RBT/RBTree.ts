@@ -1,6 +1,6 @@
 import RBTNode from "./RBTNode";
 import RBTHistory from "./RBTHistory";
-import RBTreeSnapshot from "./RBTreeSnapshot";
+import RBTSnapshot from "./RBTSnapshot";
 
 export default class RBTree {
   root: RBTNode | null;
@@ -25,7 +25,7 @@ export default class RBTree {
     return newTree;
   }
 
-  log(history: RBTreeSnapshot[], message: string) {
-    history.push(new RBTreeSnapshot(this.clone(), message));
+  log(history: RBTSnapshot[], message: string) {
+    history.push(new RBTSnapshot(this.clone(), message));
   }
 }

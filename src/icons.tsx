@@ -25,7 +25,7 @@ export function StepForwardIcon() {
 export function SkipLastIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
-      <path d="M6 18l8.5-6L6 6v12zm2.5-6 5.5 3.9V8.1l-5.5 3.9zM16 6h2v12h-2z" />
+      <path d="M16 6h2v12h-2zM14.5 12 6 18V6z" />
     </svg>
   );
 }

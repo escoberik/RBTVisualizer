@@ -1,6 +1,6 @@
 import RBTree from "./RBTree";
 
-export default class RBTreeSnapshot {
+export default class RBTSnapshot {
   readonly tree: RBTree;
   readonly description: string;
 
