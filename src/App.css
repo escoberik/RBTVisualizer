@@ -20,6 +20,8 @@ body, html {
 }
 
 .tree-svg {
+  display: block;
+  margin: 0 auto;
   max-width: 100%;
   height: auto;
   transition: width 0.3s ease;

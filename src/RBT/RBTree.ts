@@ -8,6 +8,10 @@ export default class RBTree {
     this.root = null;
   }
 
+  isEmpty() {
+    return this.root === null;
+  }
+
   clone(): RBTree {
     const newTree = new RBTree();
     newTree.root = this.root?.clone() || null;
