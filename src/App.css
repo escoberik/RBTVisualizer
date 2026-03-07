@@ -1,0 +1,68 @@
+body, html {
+  background-color: #f3f4f6;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px 16px;
+  box-sizing: border-box;
+}
+
+.visualizer {
+  width: 100%;
+  max-width: 900px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 25px 16px;
+  box-sizing: border-box;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.controls input.invalid {
+  outline: 2px solid red;
+}
+
+.controls-actions,
+.controls-nav {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+.controls-actions {
+  flex-wrap: wrap;
+}
+
+.controls-actions > input,
+.controls-actions > button {
+  flex: 1;
+  font-size: 16px;
+  margin: 0;
+  white-space: nowrap;
+  height: 50px;
+  line-height: 20px;
+}
+
+.controls-nav > button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .controls-actions > input[type="number"],
+  .controls-actions > button {
+    flex: 0 0 calc(50% - 4px);
+  }
+}
