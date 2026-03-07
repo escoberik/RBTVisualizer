@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   SkipFirstIcon,
   StepBackIcon,
@@ -21,6 +21,7 @@ export default function TreeVisualizerControls({
 }) {
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function handleInsert() {
     const num = Number(value);
@@ -30,21 +31,30 @@ export default function TreeVisualizerControls({
     }
     onInsert(num);
     setValue("");
+    inputRef.current?.focus();
   }
 
   return (
     <div className="controls">
       <div className="controls-actions">
         <input
+          ref={inputRef}
           type="number"
           id="node-value"
           name="node-value"
           placeholder="Value"
           value={value}
           className={invalid ? "invalid" : ""}
+          autoFocus
           onChange={(e) => {
             setValue(e.target.value);
             setInvalid(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleInsert();
+              onLast();
+            }
           }}
         />
         <button onClick={handleInsert}>Insert</button>
