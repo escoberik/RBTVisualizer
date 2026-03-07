@@ -1,6 +1,6 @@
 import "./App.css";
-import { cssVariablesBlock } from "./colors";
-import TreeVisualizer from "./TreeVisualizer";
+import { cssVariablesBlock } from "./TreeVisualizer/colors";
+import TreeVisualizer from "./TreeVisualizer/TreeVisualizer";
 
 export default function App() {
   return (

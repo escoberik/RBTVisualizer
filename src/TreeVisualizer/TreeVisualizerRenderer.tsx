@@ -1,5 +1,5 @@
-import RBTree from "./RBT/RBTree";
-import RBTNode from "./RBT/RBTNode";
+import RBTree from "../RBT/RBTree";
+import RBTNode from "../RBT/RBTNode";
 import { colors } from "./colors";
 
 const NIL_RADIUS = 8;

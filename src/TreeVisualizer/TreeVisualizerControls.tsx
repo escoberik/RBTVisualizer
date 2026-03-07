@@ -4,7 +4,7 @@ import {
   StepBackIcon,
   StepForwardIcon,
   SkipLastIcon,
-} from "./icons";
+} from "../icons";
 
 export default function TreeVisualizerControls({
   onInsert,

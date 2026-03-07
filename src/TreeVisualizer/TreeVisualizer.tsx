@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import RBTSnapshot from "./RBT/RBTSnapshot";
-import RBTHistory from "./RBT/RBTHistory";
-import RBTree from "./RBT/RBTree";
+import RBTSnapshot from "../RBT/RBTSnapshot";
+import RBTHistory from "../RBT/RBTHistory";
+import RBTree from "../RBT/RBTree";
 import Controls from "./TreeVisualizerControls";
 import Renderer from "./TreeVisualizerRenderer";
 
