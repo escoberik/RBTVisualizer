@@ -56,8 +56,8 @@ export default class RBTNode implements RBOptions {
   clone(parent?: RBTNode): RBTNode {
     return new RBTNode(this.value, {
       color: this.color,
-      left: this.left?.clone() || null,
-      right: this.right?.clone() || null,
+      left: this.left?.clone(this) || null,
+      right: this.right?.clone(this) || null,
       parent: parent || null,
     });
   }

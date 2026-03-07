@@ -9,7 +9,7 @@ export default class RBTHistory {
   }
 
   log(tree: RBTree, message: string) {
-    this.snapshots.push(new RBTSnapshot(tree.clone(), message));
+    this.snapshots.push(new RBTSnapshot(tree, message));
   }
 
   getSnapshot(index: number): RBTSnapshot | null {
