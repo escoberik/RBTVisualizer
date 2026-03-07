@@ -1,5 +1,5 @@
 body, html {
-  background-color: #f3f4f6;
+  background-color: var(--pico-background-color);
 }
 
 .app {
@@ -13,7 +13,7 @@ body, html {
 .visualizer {
   width: 100%;
   max-width: 900px;
-  background-color: #ffffff;
+  background-color: var(--pico-card-background-color);
   border-radius: 8px;
   padding: 25px 16px;
   box-sizing: border-box;
