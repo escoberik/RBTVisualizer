@@ -1,15 +1,16 @@
-import RBTSnapshot from "./RBTSnapshot";
+import RBTNode from "./RBTNode";
+import RBTSnapshot, { OperationType } from "./RBTSnapshot";
 import RBTree from "./RBTree";
 
 export default class RBTHistory {
   snapshots: RBTSnapshot[];
 
-  constructor(tree: RBTree, initialMessage: string) {
-    this.snapshots = [new RBTSnapshot(tree.clone(), initialMessage)];
+  constructor(tree: RBTree, type: OperationType, ...nodes: RBTNode[]) {
+    this.snapshots = [new RBTSnapshot(tree, { type, nodes })];
   }
 
-  log(tree: RBTree, message: string) {
-    this.snapshots.push(new RBTSnapshot(tree, message));
+  log(tree: RBTree, type: OperationType, ...nodes: RBTNode[]) {
+    this.snapshots.push(new RBTSnapshot(tree, { type, nodes }));
   }
 
   getSnapshot(index: number): RBTSnapshot | null {

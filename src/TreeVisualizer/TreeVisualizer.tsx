@@ -12,7 +12,7 @@ function Label({ text }: { text: string }) {
 export default function TreeVisualizer() {
   const tree = useRef(new RBTree());
   const history = useRef(
-    new RBTHistory(tree.current.clone(), "Initial empty tree"),
+    new RBTHistory(tree.current.clone(), "start"),
   );
   const index = useRef(0);
   const [snapshot, setSnapshot] = useState<RBTSnapshot>(

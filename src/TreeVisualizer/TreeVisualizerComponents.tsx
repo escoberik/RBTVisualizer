@@ -80,13 +80,3 @@ export function LeafNode({ x, y, node, left, right }: LeafNodeProperties) {
     </g>
   );
 }
-
-export function EmptyTree() {
-  const size = NIL_RADIUS * 2 + PADDING * 2;
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} width={size} className="tree-svg">
-      <SvgDefs />
-      <NilNode x={PADDING + NIL_RADIUS} y={PADDING + NIL_RADIUS} />
-    </svg>
-  );
-}
