@@ -60,6 +60,13 @@ body, html {
   justify-content: center;
 }
 
+.controls-nav > button:disabled {
+  background-color: var(--color-nil);
+  border-color: var(--color-nil);
+  cursor: default;
+  opacity: 1;
+}
+
 @media (max-width: 600px) {
   .controls-actions > input[type="number"],
   .controls-actions > button {

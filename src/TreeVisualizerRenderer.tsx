@@ -1,5 +1,6 @@
 import RBTree from "./RBT/RBTree";
 import RBTNode from "./RBT/RBTNode";
+import { colors } from "./colors";
 
 const NIL_RADIUS = 8;
 const NODE_RADIUS = NIL_RADIUS * 3;
@@ -66,11 +67,11 @@ function Edge({
 }: {
   x1: number; y1: number; x2: number; y2: number;
 }) {
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#9ca3af" strokeWidth={2} />;
+  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.edge} strokeWidth={2} />;
 }
 
 function TreeNode({ x, y, node }: { x: number; y: number; node: RBTNode }) {
-  const fill = node.isRed() ? "#e81010" : "#1f2937";
+  const fill = node.isRed() ? colors.nodeRed : colors.nodeBlack;
   return (
     <g>
       <circle cx={x} cy={y} r={NODE_RADIUS} fill={fill} />
@@ -79,7 +80,7 @@ function TreeNode({ x, y, node }: { x: number; y: number; node: RBTNode }) {
         y={y}
         textAnchor="middle"
         dominantBaseline="central"
-        fill="#fff"
+        fill={colors.nodeText}
         fontSize="14"
         fontWeight="800"
       >
