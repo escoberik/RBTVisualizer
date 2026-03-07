@@ -58,8 +58,52 @@ function buildLayout(root: RBTNode | null): {
   return { nodes, nils };
 }
 
+function SvgDefs() {
+  return (
+    <defs>
+      <radialGradient id="nilGradient" cx="35%" cy="30%" r="65%">
+        <stop offset="0%" stopColor={colors.nilHighlight} />
+        <stop offset="50%" stopColor={colors.nil} />
+        <stop offset="100%" stopColor={colors.nilDark} />
+      </radialGradient>
+      <radialGradient id="nodeRedGradient" cx="35%" cy="30%" r="65%">
+        <stop offset="0%"   stopColor={colors.nodeRedHighlight} />
+        <stop offset="55%"  stopColor={colors.nodeRed} />
+        <stop offset="100%" stopColor={colors.nodeRedDark} />
+      </radialGradient>
+      <radialGradient id="nodeBlackGradient" cx="35%" cy="30%" r="65%">
+        <stop offset="0%"   stopColor={colors.nodeBlackHighlight} />
+        <stop offset="55%"  stopColor={colors.nodeBlack} />
+        <stop offset="100%" stopColor={colors.nodeBlackDark} />
+      </radialGradient>
+      <filter id="nilShadow" x="-60%" y="-60%" width="220%" height="220%">
+        <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor={colors.dropShadow} />
+      </filter>
+      <filter id="nodeRedGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colors.nodeRedGlow} floodOpacity="0.75" />
+      </filter>
+      <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.5" />
+      </filter>
+      <filter id="edgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000000" floodOpacity="0.35" />
+      </filter>
+    </defs>
+  );
+}
+
 function NilNode({ x, y }: { x: number; y: number }) {
-  return <circle cx={x} cy={y} r={NIL_RADIUS} fill="#6b7280" />;
+  return (
+    <circle
+      cx={x}
+      cy={y}
+      r={NIL_RADIUS}
+      fill="url(#nilGradient)"
+      stroke={colors.edge}
+      strokeWidth="0.8"
+      filter="url(#nilShadow)"
+    />
+  );
 }
 
 function Edge({
@@ -67,14 +111,27 @@ function Edge({
 }: {
   x1: number; y1: number; x2: number; y2: number;
 }) {
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.edge} strokeWidth={2} />;
+  return (
+    <g filter="url(#edgeShadow)">
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.edge} strokeWidth={4} strokeLinecap="round" />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.edgeHighlight} strokeWidth={1.2} strokeLinecap="round" strokeOpacity="0.7" />
+    </g>
+  );
 }
 
 function TreeNode({ x, y, node }: { x: number; y: number; node: RBTNode }) {
-  const fill = node.isRed() ? colors.nodeRed : colors.nodeBlack;
+  const isRed = node.isRed();
   return (
     <g>
-      <circle cx={x} cy={y} r={NODE_RADIUS} fill={fill} />
+      <circle
+        cx={x}
+        cy={y}
+        r={NODE_RADIUS}
+        fill={isRed ? "url(#nodeRedGradient)" : "url(#nodeBlackGradient)"}
+        stroke={isRed ? colors.nodeRedDark : colors.nodeBlackDark}
+        strokeWidth="1"
+        filter={isRed ? "url(#nodeRedGlow)" : "url(#nodeShadow)"}
+      />
       <text
         x={x}
         y={y}
@@ -94,7 +151,8 @@ export default function TreeRenderer({ tree }: { tree: RBTree }) {
   if (!tree.root) {
     const size = NIL_RADIUS * 2 + PADDING * 2;
     return (
-      <svg width={size} height={size} style={{ display: "block", margin: "0 auto" }}>
+      <svg viewBox={`0 0 ${size} ${size}`} width={size} className="tree-svg" style={{ display: "block", margin: "0 auto" }}>
+        <SvgDefs />
         <NilNode x={PADDING + NIL_RADIUS} y={PADDING + NIL_RADIUS} />
       </svg>
     );
@@ -119,7 +177,8 @@ export default function TreeRenderer({ tree }: { tree: RBTree }) {
   }
 
   return (
-    <svg width={width} height={height} style={{ display: "block", margin: "0 auto" }}>
+    <svg viewBox={`0 0 ${width} ${height}`} width={width} className="tree-svg" style={{ display: "block", margin: "0 auto" }}>
+      <SvgDefs />
       {edges.map(({ key, ...e }) => <Edge key={key} {...e} />)}
       {nils.map(({ x, y, px, py }) => (
         <Edge key={`nil-e-${x}-${y}`} x1={px} y1={py} x2={x} y2={y} />

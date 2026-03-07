@@ -19,6 +19,12 @@ body, html {
   box-sizing: border-box;
 }
 
+.tree-svg {
+  max-width: 100%;
+  height: auto;
+  transition: width 0.3s ease;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;
