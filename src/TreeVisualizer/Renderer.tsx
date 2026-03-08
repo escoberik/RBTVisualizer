@@ -15,6 +15,7 @@ const ANIM = {
   arrowGrow: 1000,
   nodeSettle: 800, // keep in sync with --anim-node-settle in App.css
   repaint: 1000,
+  rotation: 700,
   // insertPhase1 + insertPhase2 must equal --anim-edge-fade-delay (App.css)
   insertPhase1: 200, // inserted node: ghost position → over parent
   insertPhase2: 600, // inserted node: over parent → final position
@@ -176,8 +177,68 @@ function RepaintingNode(props: LeafNodeProperties) {
   );
 }
 
+/**
+ * Wraps a LeafNode with a CSS-transition slide from its pre-rotation position.
+ * `fromDx` / `fromDy` are the offset (prevX - currentX, prevY - currentY).
+ * The wrapper starts there and transitions to translate(0,0).
+ */
+function RotatingNode({
+  fromDx,
+  fromDy,
+  ...props
+}: LeafNodeProperties & { fromDx: number; fromDy: number }) {
+  const [offset, setOffset] = useState({ dx: fromDx, dy: fromDy });
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setOffset({ dx: 0, dy: 0 }));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  return (
+    <g
+      style={{
+        transform: `translate(${offset.dx}px, ${offset.dy}px)`,
+        transition: `transform ${ANIM.rotation}ms ease-in-out`,
+      }}
+    >
+      <LeafNode {...props} />
+    </g>
+  );
+}
+
 export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
   const layout = Layout.from(snapshot?.root ?? null);
+
+  // Track the layout from the PREVIOUS snapshot so rotation animations can
+  // diff where each node came from.
+  //
+  // We update these refs during render (not in an effect) so the previous
+  // layout is always available synchronously when computing rotationOffsets.
+  // Comparing snapshotRef to the current snapshot guards against the double-
+  // render in React Strict Mode: we only advance prevLayoutRef when the
+  // snapshot identity actually changes.
+  const snapshotRef = useRef<Snapshot | null>(null);
+  const prevLayoutRef = useRef<Layout>(Layout.from(null));
+  const committedLayoutRef = useRef<Layout>(Layout.from(null));
+
+  if (snapshotRef.current !== snapshot) {
+    prevLayoutRef.current = committedLayoutRef.current;
+    committedLayoutRef.current = layout;
+    snapshotRef.current = snapshot;
+  }
+
+  // For rotation snapshots, compute the (dx, dy) from the previous position
+  // to the current position for every node that moved.
+  const rotationOffsets = (() => {
+    if (!snapshot?.isRotatedLeft && !snapshot?.isRotatedRight) return null;
+    const prevNodes = prevLayoutRef.current.nodes;
+    const offsets = new Map<number, { dx: number; dy: number }>();
+    for (const { node, x, y } of layout.nodes) {
+      const prev = prevNodes.find((n) => n.node.value === node.value);
+      if (prev && (prev.x !== x || prev.y !== y)) {
+        offsets.set(node.value, { dx: prev.x - x, dy: prev.y - y });
+      }
+    }
+    return offsets.size > 0 ? offsets : null;
+  })();
 
   // Delay viewBox resize during insertion animations so the SVG doesn't
   // expand until the node has settled into its final position.
@@ -428,6 +489,17 @@ export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
           props.node.value === snapshot.operands[0].value
         ) {
           return <RepaintingNode key={key} {...props} />;
+        }
+        const rotOffset = rotationOffsets?.get(props.node.value);
+        if (rotOffset) {
+          return (
+            <RotatingNode
+              key={key}
+              {...props}
+              fromDx={rotOffset.dx}
+              fromDy={rotOffset.dy}
+            />
+          );
         }
         return <LeafNode key={key} {...props} />;
       })}

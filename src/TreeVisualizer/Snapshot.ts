@@ -73,6 +73,14 @@ export default class Snapshot {
     return this.operation.type === "inserted_right";
   }
 
+  get isRotatedLeft(): boolean {
+    return this.operation.type === "rotated_left";
+  }
+
+  get isRotatedRight(): boolean {
+    return this.operation.type === "rotated_right";
+  }
+
   get description(): string {
     return DESCRIPTIONS[this.operation.type](this.operation.nodes);
   }
