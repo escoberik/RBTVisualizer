@@ -46,10 +46,10 @@ export interface LeafNodeProperties {
   right: ChildPos;
 }
 
-export function StandaloneNode({ x, y, node, className }: { x: number; y: number; node: RBTNode; className?: string }) {
+function NodeBody({ node }: { node: RBTNode }) {
   const isRed = node.isRed();
   return (
-    <g transform={`translate(${x}, ${y})`} className={className}>
+    <>
       <circle
         cx={0}
         cy={0}
@@ -70,12 +70,19 @@ export function StandaloneNode({ x, y, node, className }: { x: number; y: number
       >
         {node.value}
       </text>
+    </>
+  );
+}
+
+export function StandaloneNode({ x, y, node, className }: { x: number; y: number; node: RBTNode; className?: string }) {
+  return (
+    <g transform={`translate(${x}, ${y})`} className={className}>
+      <NodeBody node={node} />
     </g>
   );
 }
 
 export function LeafNode({ x, y, node, left, right }: LeafNodeProperties) {
-  const isRed = node.isRed();
   const lx = left.x - x,  ly = left.y - y;
   const rx = right.x - x, ry = right.y - y;
   return (
@@ -84,26 +91,7 @@ export function LeafNode({ x, y, node, left, right }: LeafNodeProperties) {
       {left.isNil && <NilNode x={lx} y={ly} />}
       <Edge x={rx} y={ry} childRadius={right.isNil ? NIL_RADIUS : NODE_RADIUS} />
       {right.isNil && <NilNode x={rx} y={ry} />}
-      <circle
-        cx={0}
-        cy={0}
-        r={NODE_RADIUS}
-        fill={isRed ? "url(#nodeRedGradient)" : "url(#nodeBlackGradient)"}
-        stroke={isRed ? colors.nodeRedDark : colors.nodeBlackDark}
-        strokeWidth="1"
-        filter={isRed ? "url(#nodeRedGlow)" : "url(#nodeShadow)"}
-      />
-      <text
-        x={0}
-        y={0}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill={colors.nodeText}
-        fontSize="14"
-        fontWeight="800"
-      >
-        {node.value}
-      </text>
+      <NodeBody node={node} />
     </g>
   );
 }

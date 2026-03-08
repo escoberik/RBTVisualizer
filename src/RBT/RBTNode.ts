@@ -5,7 +5,7 @@ interface RBOptions {
   parent?: RBTNode | null;
 }
 
-export default class RBTNode implements RBOptions {
+export default class RBTNode {
   value: number;
   color: boolean;
   left: RBTNode | null;

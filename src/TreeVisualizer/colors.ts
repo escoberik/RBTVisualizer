@@ -1,7 +1,3 @@
-function toCssVarName(key: string) {
-  return `--color-${key.replace(/([A-Z])/g, (_, c: string) => `-${c.toLowerCase()}`)}`;
-}
-
 export const colors = {
   nodeRed:          "#e81010",
   nodeRedHighlight: "#ffa040",
@@ -18,12 +14,3 @@ export const colors = {
   nilDark:          "#374151",
   dropShadow:       "#00000070",
 } as const;
-
-export type ColorKey = keyof typeof colors;
-
-/** Inject this into a <style> tag to make all colors available as CSS custom properties. */
-export const cssVariablesBlock = `:root {\n${
-  Object.entries(colors)
-    .map(([k, v]) => `  ${toCssVarName(k)}: ${v};`)
-    .join("\n")
-}\n}`;

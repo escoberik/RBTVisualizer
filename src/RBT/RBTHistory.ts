@@ -6,11 +6,11 @@ export default class RBTHistory {
   snapshots: RBTSnapshot[];
 
   constructor(tree: RBTree, type: OperationType, ...nodes: RBTNode[]) {
-    this.snapshots = [new RBTSnapshot(tree, { type, nodes })];
+    this.snapshots = [new RBTSnapshot(tree, { type, nodes: nodes.map(n => new RBTNode(n.value, { color: n.color })) })];
   }
 
   log(tree: RBTree, type: OperationType, ...nodes: RBTNode[]) {
-    this.snapshots.push(new RBTSnapshot(tree, { type, nodes }));
+    this.snapshots.push(new RBTSnapshot(tree, { type, nodes: nodes.map(n => new RBTNode(n.value, { color: n.color })) }));
   }
 
   getSnapshot(index: number): RBTSnapshot | null {

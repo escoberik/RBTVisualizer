@@ -4,7 +4,6 @@ import RBTree from "./RBTree";
 export type OperationType =
   | "start"
   | "new"
-  | "inserting"
   | "inserted_root"
   | "comparing_left"
   | "comparing_right"
@@ -39,8 +38,6 @@ export default class RBTSnapshot {
         return "Initial empty tree";
       case "new":
         return `Created new RED node with value: ${nodes[0].value}`;
-      case "inserting":
-        return `Inserting ${nodes[0].value}`;
       case "inserted_root":
         return `Inserted ${nodes[0].value} as root`;
       case "comparing_left":

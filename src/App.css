@@ -1,3 +1,7 @@
+:root {
+  --color-nil: #6b7280;
+}
+
 body, html {
   background-color: var(--pico-background-color);
 }
