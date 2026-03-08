@@ -65,6 +65,14 @@ export default class Snapshot {
     return this.operation.type === "comparing_right";
   }
 
+  get isInsertedLeft(): boolean {
+    return this.operation.type === "inserted_left";
+  }
+
+  get isInsertedRight(): boolean {
+    return this.operation.type === "inserted_right";
+  }
+
   get description(): string {
     return DESCRIPTIONS[this.operation.type](this.operation.nodes);
   }

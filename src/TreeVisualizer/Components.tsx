@@ -109,21 +109,35 @@ export function LeafNode({
   left,
   right,
   className,
-}: LeafNodeProperties & { className?: string }) {
+  hideLeft,
+  hideRight,
+}: LeafNodeProperties & {
+  className?: string;
+  hideLeft?: boolean;
+  hideRight?: boolean;
+}) {
   const lx = left.x - x,
     ly = left.y - y;
   const rx = right.x - x,
     ry = right.y - y;
   return (
     <g transform={`translate(${x}, ${y})`} className={className}>
-      <Edge x={lx} y={ly} childRadius={left.isNil ? NIL_RADIUS : NODE_RADIUS} />
-      {left.isNil && <NilNode x={lx} y={ly} />}
-      <Edge
-        x={rx}
-        y={ry}
-        childRadius={right.isNil ? NIL_RADIUS : NODE_RADIUS}
-      />
-      {right.isNil && <NilNode x={rx} y={ry} />}
+      {!hideLeft && (
+        <Edge
+          x={lx}
+          y={ly}
+          childRadius={left.isNil ? NIL_RADIUS : NODE_RADIUS}
+        />
+      )}
+      {!hideLeft && left.isNil && <NilNode x={lx} y={ly} />}
+      {!hideRight && (
+        <Edge
+          x={rx}
+          y={ry}
+          childRadius={right.isNil ? NIL_RADIUS : NODE_RADIUS}
+        />
+      )}
+      {!hideRight && right.isNil && <NilNode x={rx} y={ry} />}
       <NodeBody node={node} />
     </g>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import type Snapshot from "./Snapshot";
 import SvgDefs from "./SvgDefs";
 import { LeafNode, NilNode, StandaloneNode } from "./Components";
@@ -15,6 +15,9 @@ const ANIM = {
   arrowGrow: 1000,
   nodeSettle: 800, // keep in sync with --anim-node-settle in App.css
   repaint: 1000,
+  // insertPhase1 + insertPhase2 must equal --anim-edge-fade-delay (App.css)
+  insertPhase1: 200, // inserted node: ghost position → over parent
+  insertPhase2: 600, // inserted node: over parent → final position
 } as const;
 
 /** How far above its parent the ghost node hovers during inserting_under. */
@@ -130,6 +133,18 @@ function SettlingNode(props: LeafNodeProperties) {
   );
 }
 
+// Trivial wrapper used by Renderer to attach insertGroupRef to the moving node.
+function InsertingNode({
+  groupRef,
+  ...props
+}: LeafNodeProperties & { groupRef: React.RefObject<SVGGElement> }) {
+  return (
+    <g ref={groupRef}>
+      <LeafNode {...props} className="settling-leaf" />
+    </g>
+  );
+}
+
 function RepaintingNode(props: LeafNodeProperties) {
   const [started, setStarted] = useState(false);
   useEffect(() => {
@@ -163,7 +178,143 @@ function RepaintingNode(props: LeafNodeProperties) {
 
 export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
   const layout = Layout.from(snapshot?.root ?? null);
-  const { x, y, width, height } = layout.bounds;
+
+  // Delay viewBox resize during insertion animations so the SVG doesn't
+  // expand until the node has settled into its final position.
+  const [viewBoxBounds, setViewBoxBounds] = useState(layout.bounds);
+  useLayoutEffect(() => {
+    const bounds = Layout.from(snapshot?.root ?? null).bounds;
+    if (snapshot?.isInsertedRoot) {
+      const t = setTimeout(() => setViewBoxBounds(bounds), ANIM.nodeSettle);
+      return () => clearTimeout(t);
+    }
+    if (snapshot?.isInsertedLeft || snapshot?.isInsertedRight) {
+      const t = setTimeout(
+        () => setViewBoxBounds(bounds),
+        ANIM.insertPhase1 + ANIM.insertPhase2,
+      );
+      return () => clearTimeout(t);
+    }
+    setViewBoxBounds(bounds);
+  }, [snapshot]);
+
+  const { x, y, width, height } = viewBoxBounds;
+
+  // Refs for the insertion animation. Held at Renderer level so the animated
+  // edge can be rendered BEFORE layout.nodes.map, keeping it behind all nodes.
+  const insertGroupRef = useRef<SVGGElement>(null);
+  const insertEdge1Ref = useRef<SVGLineElement>(null);
+  const insertEdge2Ref = useRef<SVGLineElement>(null);
+
+  useLayoutEffect(() => {
+    if (!(snapshot?.isInsertedLeft || snapshot?.isInsertedRight)) return;
+    const childNode = layout.nodes.find(
+      (n) => n.node.value === snapshot.operands[0].value,
+    );
+    const parentNode = layout.nodes.find(
+      (n) => n.node.value === snapshot.operands[1].value,
+    );
+    if (!childNode || !parentNode) return;
+
+    const ghostOffsetX = parentNode.x - childNode.x;
+    const ghostOffsetY = parentNode.y - GHOST_ABOVE - childNode.y;
+    const parentOffsetX = parentNode.x - childNode.x;
+    const parentOffsetY = parentNode.y - childNode.y;
+
+    if (insertGroupRef.current) {
+      insertGroupRef.current.style.transform = `translate(${ghostOffsetX}px, ${ghostOffsetY}px)`;
+    }
+    const ex0 = ghostOffsetX - parentOffsetX;
+    const ey0 = ghostOffsetY - parentOffsetY;
+    const len0 = Math.sqrt(ex0 * ex0 + ey0 * ey0);
+    const s0 = len0 > NODE_RADIUS ? (len0 - NODE_RADIUS) / len0 : 0;
+    insertEdge1Ref.current?.setAttribute("x2", String(ex0 * s0));
+    insertEdge1Ref.current?.setAttribute("y2", String(ey0 * s0));
+    insertEdge2Ref.current?.setAttribute("x2", String(ex0 * s0));
+    insertEdge2Ref.current?.setAttribute("y2", String(ey0 * s0));
+  }, [snapshot]);
+
+  useEffect(() => {
+    if (!(snapshot?.isInsertedLeft || snapshot?.isInsertedRight)) return;
+    const childNode = layout.nodes.find(
+      (n) => n.node.value === snapshot.operands[0].value,
+    );
+    const parentNode = layout.nodes.find(
+      (n) => n.node.value === snapshot.operands[1].value,
+    );
+    if (!childNode || !parentNode) return;
+
+    const ghostOffsetX = parentNode.x - childNode.x;
+    const ghostOffsetY = parentNode.y - GHOST_ABOVE - childNode.y;
+    const parentOffsetX = parentNode.x - childNode.x;
+    const parentOffsetY = parentNode.y - childNode.y;
+
+    let rafId: number;
+    let startTime: number | null = null;
+    const totalDuration = ANIM.insertPhase1 + ANIM.insertPhase2;
+
+    function ease(t: number) {
+      return t * (2 - t);
+    }
+
+    function animate(time: number) {
+      if (startTime === null) startTime = time;
+      const elapsed = Math.min(time - startTime, totalDuration);
+
+      let dx: number, dy: number;
+      if (elapsed <= ANIM.insertPhase1) {
+        const t = ease(elapsed / ANIM.insertPhase1);
+        dx = ghostOffsetX + (parentOffsetX - ghostOffsetX) * t;
+        dy = ghostOffsetY + (parentOffsetY - ghostOffsetY) * t;
+      } else {
+        const t = ease((elapsed - ANIM.insertPhase1) / ANIM.insertPhase2);
+        dx = parentOffsetX * (1 - t);
+        dy = parentOffsetY * (1 - t);
+      }
+
+      if (insertGroupRef.current) {
+        insertGroupRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
+      }
+
+      const ex = dx - parentOffsetX;
+      const ey = dy - parentOffsetY;
+      const len = Math.sqrt(ex * ex + ey * ey);
+      const scale = len > NODE_RADIUS ? (len - NODE_RADIUS) / len : 0;
+      insertEdge1Ref.current?.setAttribute("x2", String(ex * scale));
+      insertEdge1Ref.current?.setAttribute("y2", String(ey * scale));
+      insertEdge2Ref.current?.setAttribute("x2", String(ex * scale));
+      insertEdge2Ref.current?.setAttribute("y2", String(ey * scale));
+
+      if (elapsed < totalDuration) rafId = requestAnimationFrame(animate);
+    }
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [snapshot]);
+
+  // Final edge endpoint for JSX (so React restores the correct value on
+  // any re-render that occurs after the rAF loop ends).
+  const insertEdgeJsx = (() => {
+    if (!(snapshot?.isInsertedLeft || snapshot?.isInsertedRight)) return null;
+    const childNode = layout.nodes.find(
+      (n) => n.node.value === snapshot.operands[0].value,
+    );
+    const parentNode = layout.nodes.find(
+      (n) => n.node.value === snapshot.operands[1].value,
+    );
+    if (!childNode || !parentNode) return null;
+
+    const fex = childNode.x - parentNode.x;
+    const fey = childNode.y - parentNode.y;
+    const flen = Math.sqrt(fex * fex + fey * fey);
+    const fscale = flen > NODE_RADIUS ? (flen - NODE_RADIUS) / flen : 0;
+    return {
+      parentSvgX: parentNode.x,
+      parentSvgY: parentNode.y,
+      finalEdgeX: fex * fscale,
+      finalEdgeY: fey * fscale,
+    };
+  })();
 
   const ghost = (() => {
     if (snapshot?.isNew)
@@ -214,6 +365,38 @@ export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
           arrow={ghost.arrow}
         />
       )}
+      {/* Animated insertion edge — rendered before all nodes so it sits
+          behind every node circle regardless of in-order position. */}
+      {insertEdgeJsx && (
+        <g
+          transform={`translate(${insertEdgeJsx.parentSvgX}, ${insertEdgeJsx.parentSvgY})`}
+        >
+          <g filter="url(#edgeShadow)">
+            <line
+              ref={insertEdge1Ref}
+              x1={0}
+              y1={0}
+              x2={insertEdgeJsx.finalEdgeX}
+              y2={insertEdgeJsx.finalEdgeY}
+              stroke={colors.edge}
+              strokeWidth={4}
+              strokeLinecap="round"
+              markerEnd="url(#arrowhead)"
+            />
+            <line
+              ref={insertEdge2Ref}
+              x1={0}
+              y1={0}
+              x2={insertEdgeJsx.finalEdgeX}
+              y2={insertEdgeJsx.finalEdgeY}
+              stroke={colors.edgeHighlight}
+              strokeWidth={1.2}
+              strokeLinecap="round"
+              strokeOpacity="0.7"
+            />
+          </g>
+        </g>
+      )}
       {layout.nodes.length === 0 && <NilNode x={0} y={0} />}
       {layout.nodes.map(({ key, ...props }) => {
         if (
@@ -221,6 +404,24 @@ export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
           props.node.value === snapshot.operands[0].value
         ) {
           return <SettlingNode key={key} {...props} />;
+        }
+        if (snapshot?.isInsertedLeft || snapshot?.isInsertedRight) {
+          // Hide the static edge on the parent; the animated edge above replaces it.
+          if (props.node.value === snapshot.operands[1].value) {
+            return (
+              <LeafNode
+                key={key}
+                {...props}
+                hideLeft={snapshot.isInsertedLeft}
+                hideRight={snapshot.isInsertedRight}
+              />
+            );
+          }
+          if (props.node.value === snapshot.operands[0].value) {
+            return (
+              <InsertingNode key={key} {...props} groupRef={insertGroupRef} />
+            );
+          }
         }
         if (
           snapshot?.isRepaintedRoot &&
