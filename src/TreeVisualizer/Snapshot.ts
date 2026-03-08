@@ -34,6 +34,14 @@ export default class Snapshot {
     return this.operation.type === "repainted_root";
   }
 
+  get isComparingLeft(): boolean {
+    return this.operation.type === "comparing_left";
+  }
+
+  get isComparingRight(): boolean {
+    return this.operation.type === "comparing_right";
+  }
+
   get description(): string {
     const { type, nodes: operands } = this.operation;
     switch (type) {
