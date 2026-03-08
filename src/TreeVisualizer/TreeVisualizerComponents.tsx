@@ -1,6 +1,5 @@
 import RBTNode from "../RBT/RBTNode";
 import { colors } from "./colors";
-import SvgDefs from "./TreeVisualizerSvgDefs";
 
 export const NIL_RADIUS = 8;
 export const NODE_RADIUS = NIL_RADIUS * 3;
@@ -45,6 +44,34 @@ export interface LeafNodeProperties {
   y: number;
   left: ChildPos;
   right: ChildPos;
+}
+
+export function StandaloneNode({ x, y, node, className }: { x: number; y: number; node: RBTNode; className?: string }) {
+  const isRed = node.isRed();
+  return (
+    <g transform={`translate(${x}, ${y})`} className={className}>
+      <circle
+        cx={0}
+        cy={0}
+        r={NODE_RADIUS}
+        fill={isRed ? "url(#nodeRedGradient)" : "url(#nodeBlackGradient)"}
+        stroke={isRed ? colors.nodeRedDark : colors.nodeBlackDark}
+        strokeWidth="1"
+        filter={isRed ? "url(#nodeRedGlow)" : "url(#nodeShadow)"}
+      />
+      <text
+        x={0}
+        y={0}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill={colors.nodeText}
+        fontSize="14"
+        fontWeight="800"
+      >
+        {node.value}
+      </text>
+    </g>
+  );
 }
 
 export function LeafNode({ x, y, node, left, right }: LeafNodeProperties) {

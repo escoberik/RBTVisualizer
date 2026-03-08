@@ -5,9 +5,9 @@ const H_GAP = 20;
 const V_GAP = 50;
 
 const COL_WIDTH = NODE_RADIUS * 2 + H_GAP;
-const ROW_HEIGHT = NODE_RADIUS * 2 + V_GAP;
+export const ROW_HEIGHT = NODE_RADIUS * 2 + V_GAP;
 const NIL_V_OFFSET = NODE_RADIUS + NIL_RADIUS + 24;
-const MARGIN = NODE_RADIUS + PADDING;
+export const MARGIN = NODE_RADIUS + PADDING;
 
 export class Layout {
   readonly nodes: (LeafNodeProperties & { key: string })[];
@@ -53,12 +53,15 @@ export class Layout {
   }
 
   get size(): { x: number; y: number; width: number; height: number } {
+    const topPad = ROW_HEIGHT + MARGIN;
+    const botPad = NIL_V_OFFSET + MARGIN;
+
     if (this.nodes.length === 0) {
       return {
-        x: -(NIL_RADIUS + PADDING),
-        y: -(NIL_RADIUS + PADDING),
-        width:  (NIL_RADIUS + PADDING) * 2,
-        height: (NIL_RADIUS + PADDING) * 2,
+        x: -(COL_WIDTH / 2 + MARGIN),
+        y: -topPad,
+        width:  COL_WIDTH + 2 * MARGIN,
+        height: topPad + botPad,
       };
     }
 
@@ -71,9 +74,9 @@ export class Layout {
 
     return {
       x: minX - MARGIN,
-      y: -MARGIN,
+      y: -topPad,
       width:  maxX - minX + 2 * MARGIN,
-      height: maxY    + 2 * MARGIN,
+      height: topPad + maxY + MARGIN,
     };
   }
 }

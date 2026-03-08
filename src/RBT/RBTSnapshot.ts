@@ -3,7 +3,7 @@ import RBTree from "./RBTree";
 
 export type OperationType =
   | "start"
-  | "create node"
+  | "new"
   | "inserting"
   | "inserted_root"
   | "comparing_left"
@@ -37,7 +37,7 @@ export default class RBTSnapshot {
     switch (type) {
       case "start":
         return "Initial empty tree";
-      case "create node":
+      case "new":
         return `Created new RED node with value: ${nodes[0].value}`;
       case "inserting":
         return `Inserting ${nodes[0].value}`;

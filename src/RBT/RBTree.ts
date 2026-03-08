@@ -20,7 +20,7 @@ export default class RBTree {
 
   insert(value: number): RBTHistory {
     const newNode = new RBTNode(value);
-    const history = new RBTHistory(this.clone(), "create node", newNode.clone());
+    const history = new RBTHistory(this.clone(), "new", newNode.clone());
     this.insertUnder(this.root, newNode, history);
     this.fixInsert(newNode, history);
 

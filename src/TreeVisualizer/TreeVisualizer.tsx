@@ -48,7 +48,7 @@ export default function TreeVisualizer() {
   return (
     <div className="visualizer">
       <Label text={snapshot.description} />
-      <Renderer tree={snapshot.tree} />
+      <Renderer snapshot={snapshot} />
       <Controls
         onInsert={handleInsert}
         onNext={moveForward}
