@@ -2,17 +2,32 @@ import { useState, useEffect, useRef } from "react";
 import type Snapshot from "./Snapshot";
 import SvgDefs from "./SvgDefs";
 import { LeafNode, NilNode, StandaloneNode } from "./Components";
-import { Layout, ROW_HEIGHT, NODE_RADIUS, NIL_RADIUS } from "./Layout";
+import { Layout, ROW_HEIGHT, NODE_RADIUS } from "./Layout";
 import type { LeafNodeProperties } from "./Layout";
 import { colors } from "./colors";
 import type { OperationNode } from "./Snapshot";
+
+/** Duration constants (ms) for all animations in this file.
+ *  CSS counterparts live in App.css as --anim-* custom properties. */
+const ANIM = {
+  ghostSlide: 500,
+  ghostFade: 1000,
+  arrowGrow: 1000,
+  nodeSettle: 800, // keep in sync with --anim-node-settle in App.css
+  repaint: 1000,
+} as const;
+
+/** How far above its parent the ghost node hovers during inserting_under. */
+const GHOST_ABOVE = (ROW_HEIGHT * 2) / 3;
 
 function GrowingArrow({ x: ex, y: ey }: { x: number; y: number }) {
   const line1Ref = useRef<SVGLineElement>(null);
   const line2Ref = useRef<SVGLineElement>(null);
 
   useEffect(() => {
-    const duration = 1000;
+    // Refs + rAF loop instead of state: avoids React re-renders on every frame,
+    // and keeps markerEnd tracking the live (x2,y2) endpoint throughout growth.
+    const duration = ANIM.arrowGrow;
     let startTime: number | null = null;
     let rafId: number;
 
@@ -86,7 +101,7 @@ function GhostNode({
       style={{
         transform: `translate(${pos.x}px, ${pos.y}px)`,
         opacity,
-        transition: "transform 0.5s ease, opacity 1s ease",
+        transition: `transform ${ANIM.ghostSlide}ms ease, opacity ${ANIM.ghostFade}ms ease`,
       }}
     >
       {arrow && (
@@ -107,7 +122,7 @@ function SettlingNode(props: LeafNodeProperties) {
     <g
       style={{
         transform: `translate(0px, ${dy}px)`,
-        transition: "transform 0.8s ease",
+        transition: `transform ${ANIM.nodeSettle}ms ease`,
       }}
     >
       <LeafNode {...props} className="settling-leaf" />
@@ -128,7 +143,7 @@ function RepaintingNode(props: LeafNodeProperties) {
         <g
           style={{
             opacity: started ? 0 : 1,
-            transition: "opacity 1s ease-in-out",
+            transition: `opacity ${ANIM.repaint}ms ease-in-out`,
           }}
         >
           <circle
@@ -164,20 +179,17 @@ export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
       );
       if (!parent) return null;
 
-      let arrow: { x: number; y: number } | undefined;
-      if (snapshot.isComparingLeft || snapshot.isComparingRight) {
-        const child = snapshot.isComparingLeft ? parent.left : parent.right;
-        const dx = child.x - parent.x;
-        const dy = child.y - parent.y;
-        const len = Math.sqrt(dx * dx + dy * dy);
-        const childRadius = child.isNil ? NIL_RADIUS : NODE_RADIUS;
-        const scale = len > 0 ? (len - childRadius) / len : 0;
-        arrow = { x: dx * scale, y: dy * scale };
-      }
+      const arrow = snapshot.isComparingLeft
+        ? (layout.arrowEndpoint(snapshot.operands[1].value, "left") ??
+          undefined)
+        : snapshot.isComparingRight
+          ? (layout.arrowEndpoint(snapshot.operands[1].value, "right") ??
+            undefined)
+          : undefined;
 
       return {
         x: parent.x,
-        y: parent.y - (ROW_HEIGHT * 2) / 3,
+        y: parent.y - GHOST_ABOVE,
         node: snapshot.operands[0],
         arrow,
       };

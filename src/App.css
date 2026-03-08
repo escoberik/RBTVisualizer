@@ -1,5 +1,10 @@
 :root {
   --color-nil: #6b7280;
+
+  /* Animation durations — keep in sync with ANIM constants in Renderer.tsx */
+  --anim-node-settle: 800ms;
+  --anim-edge-fade: 200ms;
+  --anim-edge-fade-delay: 800ms;
 }
 
 body,
@@ -96,7 +101,8 @@ html {
 .settling-leaf .edge-group,
 .settling-leaf .nil-node-group {
   opacity: 0;
-  animation: fadeIn 0.2s ease 0.8s forwards;
+  animation: fadeIn var(--anim-edge-fade) ease var(--anim-edge-fade-delay)
+    forwards;
 }
 
 @media (max-width: 600px) {

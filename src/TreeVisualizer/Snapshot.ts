@@ -8,6 +8,29 @@ interface Operation {
   readonly nodes: readonly [OperationNode, ...OperationNode[]];
 }
 
+type DescriptionFn = (
+  o: readonly [OperationNode, ...OperationNode[]],
+) => string;
+
+const DESCRIPTIONS: Record<SnapshotType, DescriptionFn> = {
+  new: (o) => `Created new RED node with value: ${o[0].value}`,
+  inserted_root: (o) => `Inserted ${o[0].value} as root`,
+  inserting_under: (o) => `Inserting ${o[0].value} under ${o[1].value}`,
+  comparing_left: (o) => `${o[0].value} < ${o[1].value}, going left`,
+  comparing_right: (o) => `${o[0].value} >= ${o[1].value}, going right`,
+  inserted_left: (o) => `Inserted ${o[0].value} as left child of ${o[1].value}`,
+  inserted_right: (o) =>
+    `Inserted ${o[0].value} as right child of ${o[1].value}`,
+  recolored: (o) =>
+    `Repainted parent ${o[0].value} and uncle ${o[1].value} black`,
+  recolored_grandparent: (o) => `Repainted grandparent ${o[0].value} red`,
+  rotated_left: (o) => `Left rotation on ${o[0].value}`,
+  rotated_right: (o) => `Right rotation on ${o[0].value}`,
+  recolored_after_rotation: (o) =>
+    `Repainted ${o[0].value} black and ${o[1].value} red`,
+  repainted_root: (o) => `Repainted root ${o[0].value} black`,
+};
+
 export default class Snapshot {
   constructor(
     readonly root: RBTNode | null,
@@ -43,34 +66,6 @@ export default class Snapshot {
   }
 
   get description(): string {
-    const { type, nodes: operands } = this.operation;
-    switch (type) {
-      case "new":
-        return `Created new RED node with value: ${operands[0].value}`;
-      case "inserted_root":
-        return `Inserted ${operands[0].value} as root`;
-      case "inserting_under":
-        return `Inserting ${operands[0].value} under ${operands[1].value}`;
-      case "comparing_left":
-        return `${operands[0].value} < ${operands[1].value}, going left`;
-      case "comparing_right":
-        return `${operands[0].value} >= ${operands[1].value}, going right`;
-      case "inserted_left":
-        return `Inserted ${operands[0].value} as left child of ${operands[1].value}`;
-      case "inserted_right":
-        return `Inserted ${operands[0].value} as right child of ${operands[1].value}`;
-      case "recolored":
-        return `Repainted parent ${operands[0].value} and uncle ${operands[1].value} black`;
-      case "recolored_grandparent":
-        return `Repainted grandparent ${operands[0].value} red`;
-      case "rotated_left":
-        return `Left rotation on ${operands[0].value}`;
-      case "rotated_right":
-        return `Right rotation on ${operands[0].value}`;
-      case "recolored_after_rotation":
-        return `Repainted ${operands[0].value} black and ${operands[1].value} red`;
-      case "repainted_root":
-        return `Repainted root ${operands[0].value} black`;
-    }
+    return DESCRIPTIONS[this.operation.type](this.operation.nodes);
   }
 }

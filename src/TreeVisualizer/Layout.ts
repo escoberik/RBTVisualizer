@@ -1,4 +1,4 @@
-import RBTNode from "../RBT/RBTNode";
+import type RBTNode from "../RBT/RBTNode";
 
 export const NIL_RADIUS = 8;
 export const NODE_RADIUS = NIL_RADIUS * 3;
@@ -49,23 +49,53 @@ export class Layout {
     if (raw.length === 0) return new Layout([]);
 
     // Shift x so the root sits at x=0
-    const rootX = raw.find(p => p.node === root)!.x;
+    const rootX = raw.find((p) => p.node === root)!.x;
     for (const p of raw) p.x -= rootX;
 
     const posMap = new Map(raw.map((p) => [p.node, p]));
 
     const nodes = raw.map(({ node, x, y, index }) => ({
-      node, x, y,
+      node,
+      x,
+      y,
       key: `node-${index}`,
       left: node.left
-        ? { x: posMap.get(node.left)!.x, y: posMap.get(node.left)!.y, isNil: false }
+        ? {
+            x: posMap.get(node.left)!.x,
+            y: posMap.get(node.left)!.y,
+            isNil: false,
+          }
         : { x: x - COL_WIDTH / 2, y: y + NIL_V_OFFSET, isNil: true },
       right: node.right
-        ? { x: posMap.get(node.right)!.x, y: posMap.get(node.right)!.y, isNil: false }
+        ? {
+            x: posMap.get(node.right)!.x,
+            y: posMap.get(node.right)!.y,
+            isNil: false,
+          }
         : { x: x + COL_WIDTH / 2, y: y + NIL_V_OFFSET, isNil: true },
     }));
 
     return new Layout(nodes);
+  }
+
+  /**
+   * Returns the tip of an edge from `parentValue`'s node toward its left/right
+   * child, shortened to stop at the child's circumference — matching exactly
+   * the endpoint drawn by the Edge component.
+   */
+  arrowEndpoint(
+    parentValue: number,
+    side: "left" | "right",
+  ): { x: number; y: number } | null {
+    const parent = this.nodes.find((n) => n.node.value === parentValue);
+    if (!parent) return null;
+    const child = side === "left" ? parent.left : parent.right;
+    const dx = child.x - parent.x;
+    const dy = child.y - parent.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const childRadius = child.isNil ? NIL_RADIUS : NODE_RADIUS;
+    const scale = len > 0 ? (len - childRadius) / len : 0;
+    return { x: dx * scale, y: dy * scale };
   }
 
   get bounds(): { x: number; y: number; width: number; height: number } {
@@ -76,12 +106,14 @@ export class Layout {
       return {
         x: -(COL_WIDTH / 2 + MARGIN),
         y: -topPad,
-        width:  COL_WIDTH + 2 * MARGIN,
+        width: COL_WIDTH + 2 * MARGIN,
         height: topPad + botPad,
       };
     }
 
-    let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
     for (const { x, y, left, right } of this.nodes) {
       minX = Math.min(minX, x, left.x, right.x);
       maxX = Math.max(maxX, x, left.x, right.x);
@@ -91,7 +123,7 @@ export class Layout {
     return {
       x: minX - MARGIN,
       y: -topPad,
-      width:  maxX - minX + 2 * MARGIN,
+      width: maxX - minX + 2 * MARGIN,
       height: topPad + maxY + MARGIN,
     };
   }

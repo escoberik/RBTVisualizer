@@ -2,7 +2,12 @@ import { useRef, useState } from "react";
 import RBTNode from "../RBT/RBTNode";
 import RBTree from "../RBT/RBTree";
 import SnapshotHistory from "./SnapshotHistory";
-import Snapshot from "./Snapshot";
+import type Snapshot from "./Snapshot";
+import type { OperationNode } from "./Snapshot";
+
+function toOperand(node: RBTNode): OperationNode {
+  return { value: node.value, red: node.red };
+}
 
 export default function useSnapshotHistory() {
   const tree = useRef(new RBTree());
@@ -23,14 +28,18 @@ export default function useSnapshotHistory() {
     // it's actually inserted
     const ghostNode = new RBTNode(value);
     const preInsertRoot = tree.current.root?.clone() ?? null;
-    const newHistory = new SnapshotHistory(preInsertRoot, "new", ghostNode);
+    const newHistory = new SnapshotHistory(
+      preInsertRoot,
+      "new",
+      toOperand(ghostNode),
+    );
 
     tree.current.insert(value, (type, first, ...rest) => {
       newHistory.record(
         tree.current.root?.clone() ?? null,
         type,
-        first,
-        ...rest,
+        toOperand(first),
+        ...rest.map(toOperand),
       );
     });
     history.current = newHistory;

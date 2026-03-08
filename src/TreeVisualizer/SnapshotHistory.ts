@@ -1,4 +1,4 @@
-import RBTNode from "../RBT/RBTNode";
+import type RBTNode from "../RBT/RBTNode";
 import Snapshot, { type OperationNode } from "./Snapshot";
 import type { SnapshotType } from "./SnapshotType";
 
@@ -8,13 +8,13 @@ export default class SnapshotHistory {
   constructor(
     root: RBTNode | null,
     type: SnapshotType,
-    firstNode: RBTNode,
-    ...restNodes: RBTNode[]
+    firstNode: OperationNode,
+    ...restNodes: OperationNode[]
   ) {
     this.snapshots = [
       new Snapshot(root, {
         type,
-        nodes: SnapshotHistory.toValueNodes(firstNode, restNodes),
+        nodes: [firstNode, ...restNodes],
       }),
     ];
   }
@@ -22,25 +22,15 @@ export default class SnapshotHistory {
   record(
     root: RBTNode | null,
     type: SnapshotType,
-    firstNode: RBTNode,
-    ...restNodes: RBTNode[]
+    firstNode: OperationNode,
+    ...restNodes: OperationNode[]
   ) {
     this.snapshots.push(
       new Snapshot(root, {
         type,
-        nodes: SnapshotHistory.toValueNodes(firstNode, restNodes),
+        nodes: [firstNode, ...restNodes],
       }),
     );
-  }
-
-  private static toValueNodes(
-    first: RBTNode,
-    rest: RBTNode[],
-  ): [OperationNode, ...OperationNode[]] {
-    return [
-      { value: first.value, red: first.red },
-      ...rest.map((n) => ({ value: n.value, red: n.red })),
-    ];
   }
 
   getSnapshot(index: number): Snapshot | null {
