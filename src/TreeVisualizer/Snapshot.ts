@@ -26,6 +26,10 @@ export default class Snapshot {
     return this.operation.type === "inserted_root";
   }
 
+  get isInsertingUnder(): boolean {
+    return this.operation.type === "inserting_under";
+  }
+
   get isRepaintedRoot(): boolean {
     return this.operation.type === "repainted_root";
   }
@@ -37,6 +41,8 @@ export default class Snapshot {
         return `Created new RED node with value: ${operands[0].value}`;
       case "inserted_root":
         return `Inserted ${operands[0].value} as root`;
+      case "inserting_under":
+        return `Inserting ${operands[0].value} under ${operands[1].value}`;
       case "comparing_left":
         return `${operands[0].value} < ${operands[1].value}, going left`;
       case "comparing_right":

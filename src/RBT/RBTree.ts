@@ -28,6 +28,7 @@ export default class RBTree {
       return;
     }
 
+    log("inserting_under", child, parent);
     if (child.value < parent.value) {
       log("comparing_left", child, parent);
       if (parent.left) {

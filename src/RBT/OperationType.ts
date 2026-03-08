@@ -1,5 +1,6 @@
 export type OperationType =
   | "inserted_root"
+  | "inserting_under"
   | "comparing_left"
   | "comparing_right"
   | "inserted_left"
