@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import type Snapshot from "./Snapshot";
 import SvgDefs from "./SvgDefs";
 import { LeafNode, NilNode, StandaloneNode } from "./Components";
-import { Layout, ROW_HEIGHT } from "./Layout";
+import { Layout, ROW_HEIGHT, NODE_RADIUS } from "./Layout";
 import type { LeafNodeProperties } from "./Layout";
+import { colors } from "./colors";
 
 function SettlingNode(props: LeafNodeProperties) {
   const [dy, setDy] = useState(-ROW_HEIGHT);
@@ -20,6 +21,37 @@ function SettlingNode(props: LeafNodeProperties) {
     >
       <LeafNode {...props} className="settling-leaf" />
     </g>
+  );
+}
+
+function RepaintingNode(props: LeafNodeProperties) {
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setStarted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  return (
+    <>
+      <LeafNode {...props} />
+      <g transform={`translate(${props.x}, ${props.y})`}>
+        <g
+          style={{
+            opacity: started ? 0 : 1,
+            transition: "opacity 1s ease-in-out",
+          }}
+        >
+          <circle
+            cx={0}
+            cy={0}
+            r={NODE_RADIUS}
+            fill="url(#nodeRedGradient)"
+            stroke={colors.nodeRedDark}
+            strokeWidth="1"
+            filter="url(#nodeRedGlow)"
+          />
+        </g>
+      </g>
+    </>
   );
 }
 
@@ -49,6 +81,12 @@ export default function Renderer({ snapshot }: { snapshot: Snapshot | null }) {
           props.node.value === snapshot.operands[0].value
         ) {
           return <SettlingNode key={key} {...props} />;
+        }
+        if (
+          snapshot?.isRepaintedRoot &&
+          props.node.value === snapshot.operands[0].value
+        ) {
+          return <RepaintingNode key={key} {...props} />;
         }
         return <LeafNode key={key} {...props} />;
       })}

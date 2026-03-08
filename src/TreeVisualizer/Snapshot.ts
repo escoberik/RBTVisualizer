@@ -26,6 +26,10 @@ export default class Snapshot {
     return this.operation.type === "inserted_root";
   }
 
+  get isRepaintedRoot(): boolean {
+    return this.operation.type === "repainted_root";
+  }
+
   get description(): string {
     const { type, nodes: operands } = this.operation;
     switch (type) {
