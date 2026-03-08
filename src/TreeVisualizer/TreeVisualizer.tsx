@@ -1,26 +1,22 @@
-import useRBTHistory from "./useRBTHistory";
-import Controls from "./TreeVisualizerControls";
-import Renderer from "./TreeVisualizerRenderer";
-
-function Label({ text }: { text: string }) {
-  return <p>{text}</p>;
-}
+import useSnapshotHistory from "./useSnapshotHistory";
+import Controls from "./Controls";
+import Renderer from "./Renderer";
 
 export default function TreeVisualizer() {
-  const { snapshot, step, length, navigate, insert } = useRBTHistory();
+  const { snapshot, isFirst, isLast, navigateFirst, navigateLast, navigateNext, navigatePrev, insert } = useSnapshotHistory();
 
   return (
     <div className="visualizer">
-      <Label text={snapshot.description} />
+      <p>{snapshot?.description ?? "Insert a value to begin"}</p>
       <Renderer snapshot={snapshot} />
       <Controls
         onInsert={insert}
-        onNext={() => navigate(step + 1)}
-        onPrev={() => navigate(step - 1)}
-        onFirst={() => navigate(0)}
-        onLast={() => navigate(length - 1)}
-        isFirst={step === 0}
-        isLast={step === length - 1}
+        onNext={navigateNext}
+        onPrev={navigatePrev}
+        onFirst={navigateFirst}
+        onLast={navigateLast}
+        isFirst={isFirst}
+        isLast={isLast}
       />
     </div>
   );

@@ -1,39 +1,29 @@
 import RBTNode from "./RBTNode";
-import { OperationType } from "./RBTOperationType";
+import type { OperationType } from "./OperationType";
 
-type StepLogger = (type: OperationType, ...nodes: RBTNode[]) => void;
+export type StepLogger = (type: OperationType, firstNode: RBTNode, ...nodes: RBTNode[]) => void;
 
 export default class RBTree {
-  root: RBTNode | null;
+  private _root: RBTNode | null = null;
 
-  constructor() {
-    this.root = null;
-  }
+  get root(): RBTNode | null { return this._root; }
 
-  isEmpty() {
-    return this.root === null;
-  }
-
-  clone(): RBTree {
-    const newTree = new RBTree();
-    newTree.root = this.root?.clone() ?? null;
-    return newTree;
-  }
-
-  insert(value: number, log: StepLogger): void {
+  insert(value: number, log: StepLogger): RBTNode {
     const newNode = new RBTNode(value);
-    this.insertUnder(this.root, newNode, log);
+    this.insertUnder(this._root, newNode, log);
     this.fixInsert(newNode, log);
 
-    if (this.root?.isRed()) {
-      this.root.paintBlack();
-      log("repainted_root", this.root);
+    if (this._root?.isRed) {
+      this._root.paintBlack();
+      log("repainted_root", this._root);
     }
+
+    return newNode;
   }
 
   private insertUnder(parent: RBTNode | null, child: RBTNode, log: StepLogger) {
     if (!parent) {
-      this.root = child;
+      this._root = child;
       log("inserted_root", child);
       return;
     }
@@ -60,16 +50,16 @@ export default class RBTree {
   }
 
   private fixInsert(node: RBTNode, log: StepLogger) {
-    if (node.isRoot()) return;
+    if (node.isRoot) return;
 
     const parent = node.parent!;
-    if (parent.isBlack()) return;
+    if (parent.isBlack) return;
 
     // Root is always black, so parent must have a grandparent
     const grandparent = parent.parent!;
-    const uncle = node.getUncle();
+    const uncle = node.uncle;
 
-    if (uncle?.isRed()) {
+    if (uncle?.isRed) {
       this.fixUncleIsRed(parent, uncle, grandparent, log);
       return;
     }
@@ -146,7 +136,7 @@ export default class RBTree {
 
     pivot.parent = node.parent;
     if (!node.parent) {
-      this.root = pivot;
+      this._root = pivot;
     } else if (node === node.parent.left) {
       node.parent.left = pivot;
     } else {
@@ -164,7 +154,7 @@ export default class RBTree {
 
     pivot.parent = node.parent;
     if (!node.parent) {
-      this.root = pivot;
+      this._root = pivot;
     } else if (node === node.parent.right) {
       node.parent.right = pivot;
     } else {

@@ -1,24 +1,27 @@
-import RBTNode from "../RBT/RBTNode";
 import { colors } from "./colors";
-import { NIL_RADIUS, NODE_RADIUS } from "./TreeVisualizerLayout";
-import type { LeafNodeProperties } from "./TreeVisualizerLayout";
+import { NIL_RADIUS, NODE_RADIUS } from "./Layout";
+import type { LeafNodeProperties } from "./Layout";
+import type { OperationNode } from "./Snapshot";
 
 export function NilNode({ x, y }: { x: number; y: number }) {
   return (
-    <circle
-      cx={x}
-      cy={y}
-      r={NIL_RADIUS}
-      fill="url(#nilGradient)"
-      stroke={colors.edge}
-      strokeWidth="0.8"
-      filter="url(#nilShadow)"
-    />
+    <g transform={`translate(${x}, ${y})`}>
+      <circle
+        cx={0}
+        cy={0}
+        r={NIL_RADIUS}
+        fill="url(#nilGradient)"
+        stroke={colors.edge}
+        strokeWidth="0.8"
+        filter="url(#nilShadow)"
+      />
+    </g>
   );
 }
 
 function Edge({ x, y, childRadius }: { x: number; y: number; childRadius: number }) {
   const len = Math.sqrt(x * x + y * y);
+  if (len === 0) return null;
   const scale = (len - childRadius) / len;
   const ex = x * scale;
   const ey = y * scale;
@@ -30,8 +33,8 @@ function Edge({ x, y, childRadius }: { x: number; y: number; childRadius: number
   );
 }
 
-function NodeBody({ node }: { node: RBTNode }) {
-  const isRed = node.isRed();
+function NodeBody({ node }: { node: OperationNode }) {
+  const isRed = node.red;
   return (
     <>
       <circle
@@ -58,7 +61,14 @@ function NodeBody({ node }: { node: RBTNode }) {
   );
 }
 
-export function StandaloneNode({ x, y, node, className }: { x: number; y: number; node: RBTNode; className?: string }) {
+type StandaloneNodeProps = {
+  x: number;
+  y: number;
+  node: OperationNode;
+  className?: string;
+};
+
+export function StandaloneNode({ x, y, node, className }: StandaloneNodeProps) {
   return (
     <g transform={`translate(${x}, ${y})`} className={className}>
       <NodeBody node={node} />

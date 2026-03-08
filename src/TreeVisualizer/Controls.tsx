@@ -6,15 +6,7 @@ import {
   SkipLastIcon,
 } from "../icons";
 
-export default function TreeVisualizerControls({
-  onInsert,
-  onNext,
-  onPrev,
-  onFirst,
-  onLast,
-  isFirst,
-  isLast,
-}: {
+type ControlsProps = {
   onInsert: (value: number) => void;
   onNext: () => void;
   onPrev: () => void;
@@ -22,7 +14,17 @@ export default function TreeVisualizerControls({
   onLast: () => void;
   isFirst: boolean;
   isLast: boolean;
-}) {
+};
+
+export default function Controls({
+  onInsert,
+  onNext,
+  onPrev,
+  onFirst,
+  onLast,
+  isFirst,
+  isLast,
+}: ControlsProps) {
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,8 +64,8 @@ export default function TreeVisualizerControls({
           }}
         />
         <button onClick={handleInsert}>Insert</button>
-        <button>Find</button>
-        <button>Delete</button>
+        <button disabled={true}>Find</button>
+        <button disabled={true}>Delete</button>
       </div>
       <div className="controls-nav">
         <button title="First step" onClick={onFirst} disabled={isFirst}>

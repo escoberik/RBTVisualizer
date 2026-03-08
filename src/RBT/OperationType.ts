@@ -1,6 +1,4 @@
 export type OperationType =
-  | "start"
-  | "new"
   | "inserted_root"
   | "comparing_left"
   | "comparing_right"

@@ -25,10 +25,10 @@ export default function SvgDefs() {
         <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colors.nodeRedGlow} floodOpacity="0.75" />
       </filter>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.5" />
+        <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor={colors.dropShadow} />
       </filter>
       <filter id="edgeShadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000000" floodOpacity="0.35" />
+        <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor={colors.dropShadow} />
       </filter>
       <linearGradient id="arrowGradient" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stopColor={colors.edge} />

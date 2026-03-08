@@ -2,15 +2,15 @@ import RBTNode from "../RBT/RBTNode";
 
 export const NIL_RADIUS = 8;
 export const NODE_RADIUS = NIL_RADIUS * 3;
-export const PADDING = 30;
+const PADDING = 30;
 
 const H_GAP = 20;
 const V_GAP = 50;
 
 const COL_WIDTH = NODE_RADIUS * 2 + H_GAP;
 export const ROW_HEIGHT = NODE_RADIUS * 2 + V_GAP;
-const NIL_V_OFFSET = NODE_RADIUS + NIL_RADIUS + 24;
-export const MARGIN = NODE_RADIUS + PADDING;
+const NIL_V_OFFSET = 2 * NODE_RADIUS + NIL_RADIUS;
+const MARGIN = NODE_RADIUS + PADDING;
 
 export interface ChildPos {
   x: number;
@@ -35,13 +35,12 @@ export class Layout {
 
   static from(root: RBTNode | null): Layout {
     const raw: { node: RBTNode; x: number; y: number; index: number }[] = [];
-    let index = 0;
 
     function traverse(node: RBTNode | null, depth: number) {
       if (!node) return;
       traverse(node.left, depth + 1);
+      const index = raw.length;
       raw.push({ node, x: index * COL_WIDTH, y: depth * ROW_HEIGHT, index });
-      index++;
       traverse(node.right, depth + 1);
     }
 
@@ -69,11 +68,11 @@ export class Layout {
     return new Layout(nodes);
   }
 
-  get size(): { x: number; y: number; width: number; height: number } {
+  get bounds(): { x: number; y: number; width: number; height: number } {
     const topPad = ROW_HEIGHT + MARGIN;
-    const botPad = NIL_V_OFFSET + MARGIN;
 
     if (this.nodes.length === 0) {
+      const botPad = NIL_V_OFFSET + MARGIN;
       return {
         x: -(COL_WIDTH / 2 + MARGIN),
         y: -topPad,

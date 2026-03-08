@@ -1,13 +1,11 @@
 interface RBOptions {
-  color?: boolean; // true for red, false for black
-  left?: RBTNode | null;
-  right?: RBTNode | null;
+  red?: boolean;
   parent?: RBTNode | null;
 }
 
 export default class RBTNode {
   value: number;
-  color: boolean;
+  red: boolean;
   left: RBTNode | null;
   right: RBTNode | null;
   parent: RBTNode | null;
@@ -17,34 +15,34 @@ export default class RBTNode {
     options?: RBOptions,
   ) {
     this.value = value;
-    this.color = options?.color ?? true; // New nodes are red by default
-    this.left = options?.left ?? null;
-    this.right = options?.right ?? null;
+    this.red = options?.red ?? true; // New nodes are red by default
+    this.left = null;
+    this.right = null;
     this.parent = options?.parent ?? null;
   }
 
-  isRed(): boolean {
-    return this.color;
+  get isRed(): boolean {
+    return this.red;
   }
 
-  isBlack(): boolean {
-    return !this.color;
+  get isBlack(): boolean {
+    return !this.red;
   }
 
   paintRed() {
-    this.color = true;
+    this.red = true;
   }
 
   paintBlack() {
-    this.color = false;
+    this.red = false;
   }
 
-  isRoot(): boolean {
+  get isRoot(): boolean {
     return !this.parent;
   }
 
-  getSibling(): RBTNode | null {
-    if (this.isRoot()) return null;
+  get sibling(): RBTNode | null {
+    if (this.isRoot) return null;
 
     if (this === this.parent!.left) {
       return this.parent!.right;
@@ -53,14 +51,18 @@ export default class RBTNode {
     }
   }
 
-  getUncle(): RBTNode | null {
-    return this.parent?.getSibling() || null;
+  get uncle(): RBTNode | null {
+    return this.parent?.sibling ?? null;
   }
 
-  clone(parent: RBTNode | null = null): RBTNode {
-    const cloned = new RBTNode(this.value, { color: this.color, parent });
-    cloned.left = this.left?.clone(cloned) ?? null;
-    cloned.right = this.right?.clone(cloned) ?? null;
+  clone(): RBTNode {
+    return this.cloneWithParent(null);
+  }
+
+  private cloneWithParent(parent: RBTNode | null): RBTNode {
+    const cloned = new RBTNode(this.value, { red: this.red, parent });
+    cloned.left = this.left?.cloneWithParent(cloned) ?? null;
+    cloned.right = this.right?.cloneWithParent(cloned) ?? null;
     return cloned;
   }
 }
