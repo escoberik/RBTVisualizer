@@ -1,9 +1,8 @@
 import RBTNode from "../RBT/RBTNode";
 import { colors } from "./colors";
+import { NIL_RADIUS, NODE_RADIUS, ChildPos, LeafNodeProperties } from "./TreeVisualizerLayout";
 
-export const NIL_RADIUS = 8;
-export const NODE_RADIUS = NIL_RADIUS * 3;
-export const PADDING = 30;
+export { NIL_RADIUS, NODE_RADIUS, ChildPos, LeafNodeProperties };
 
 export function NilNode({ x, y }: { x: number; y: number }) {
   return (
@@ -30,20 +29,6 @@ function Edge({ x, y, childRadius }: { x: number; y: number; childRadius: number
       <line x1={0} y1={0} x2={ex} y2={ey} stroke={colors.edgeHighlight} strokeWidth={1.2} strokeLinecap="round" strokeOpacity="0.7" />
     </g>
   );
-}
-
-export interface ChildPos {
-  x: number;
-  y: number;
-  isNil: boolean;
-}
-
-export interface LeafNodeProperties {
-  node: RBTNode;
-  x: number;
-  y: number;
-  left: ChildPos;
-  right: ChildPos;
 }
 
 function NodeBody({ node }: { node: RBTNode }) {

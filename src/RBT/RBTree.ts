@@ -1,5 +1,7 @@
 import RBTNode from "./RBTNode";
-import RBTHistory from "./RBTHistory";
+import { OperationType } from "./RBTOperationType";
+
+type StepLogger = (type: OperationType, ...nodes: RBTNode[]) => void;
 
 export default class RBTree {
   root: RBTNode | null;
@@ -14,59 +16,50 @@ export default class RBTree {
 
   clone(): RBTree {
     const newTree = new RBTree();
-    newTree.root = this.root?.clone() || null;
+    newTree.root = this.root?.clone() ?? null;
     return newTree;
   }
 
-  insert(value: number): RBTHistory {
+  insert(value: number, log: StepLogger): void {
     const newNode = new RBTNode(value);
-    const history = new RBTHistory(this.clone(), "new", newNode.clone());
-    this.insertUnder(this.root, newNode, history);
-    this.fixInsert(newNode, history);
+    this.insertUnder(this.root, newNode, log);
+    this.fixInsert(newNode, log);
 
     if (this.root?.isRed()) {
       this.root.paintBlack();
-      history.log(this.clone(), "repainted_root", this.root);
+      log("repainted_root", this.root);
     }
-
-    return history;
   }
 
-  private insertUnder(
-    parent: RBTNode | null,
-    child: RBTNode,
-    history: RBTHistory,
-  ) {
+  private insertUnder(parent: RBTNode | null, child: RBTNode, log: StepLogger) {
     if (!parent) {
       this.root = child;
-      history.log(this.clone(), "inserted_root", child);
+      log("inserted_root", child);
       return;
     }
 
     if (child.value < parent.value) {
-      history.log(this.clone(), "comparing_left", child, parent);
-
+      log("comparing_left", child, parent);
       if (parent.left) {
-        this.insertUnder(parent.left, child, history);
+        this.insertUnder(parent.left, child, log);
       } else {
         parent.left = child;
         child.parent = parent;
-        history.log(this.clone(), "inserted_left", child, parent);
+        log("inserted_left", child, parent);
       }
     } else {
-      history.log(this.clone(), "comparing_right", child, parent);
-
+      log("comparing_right", child, parent);
       if (parent.right) {
-        this.insertUnder(parent.right, child, history);
+        this.insertUnder(parent.right, child, log);
       } else {
         parent.right = child;
         child.parent = parent;
-        history.log(this.clone(), "inserted_right", child, parent);
+        log("inserted_right", child, parent);
       }
     }
   }
 
-  private fixInsert(node: RBTNode, history: RBTHistory) {
+  private fixInsert(node: RBTNode, log: StepLogger) {
     if (node.isRoot()) return;
 
     const parent = node.parent!;
@@ -77,14 +70,14 @@ export default class RBTree {
     const uncle = node.getUncle();
 
     if (uncle?.isRed()) {
-      this.fixUncleIsRed(parent, uncle, grandparent, history);
+      this.fixUncleIsRed(parent, uncle, grandparent, log);
       return;
     }
 
     if (parent === grandparent.left) {
-      this.fixParentIsLeft(node, parent, grandparent, history);
+      this.fixParentIsLeft(node, parent, grandparent, log);
     } else {
-      this.fixParentIsRight(node, parent, grandparent, history);
+      this.fixParentIsRight(node, parent, grandparent, log);
     }
   }
 
@@ -92,58 +85,58 @@ export default class RBTree {
     parent: RBTNode,
     uncle: RBTNode,
     grandparent: RBTNode,
-    history: RBTHistory,
+    log: StepLogger,
   ) {
     parent.paintBlack();
     uncle.paintBlack();
-    history.log(this.clone(), "recolored", parent, uncle);
+    log("recolored", parent, uncle);
 
     grandparent.paintRed();
-    history.log(this.clone(), "recolored_grandparent", grandparent);
+    log("recolored_grandparent", grandparent);
 
-    this.fixInsert(grandparent, history);
+    this.fixInsert(grandparent, log);
   }
 
   private fixParentIsLeft(
     node: RBTNode,
     parent: RBTNode,
     grandparent: RBTNode,
-    history: RBTHistory,
+    log: StepLogger,
   ) {
     if (node === parent.right) {
       this.rotateLeft(parent);
-      history.log(this.clone(), "rotated_left", parent);
+      log("rotated_left", parent);
       node = parent;
       parent = node.parent!;
     }
 
     this.rotateRight(grandparent);
-    history.log(this.clone(), "rotated_right", grandparent);
+    log("rotated_right", grandparent);
 
     parent.paintBlack();
     grandparent.paintRed();
-    history.log(this.clone(), "recolored_after_rotation", parent, grandparent);
+    log("recolored_after_rotation", parent, grandparent);
   }
 
   private fixParentIsRight(
     node: RBTNode,
     parent: RBTNode,
     grandparent: RBTNode,
-    history: RBTHistory,
+    log: StepLogger,
   ) {
     if (node === parent.left) {
       this.rotateRight(parent);
-      history.log(this.clone(), "rotated_right", parent);
+      log("rotated_right", parent);
       node = parent;
       parent = node.parent!;
     }
 
     this.rotateLeft(grandparent);
-    history.log(this.clone(), "rotated_left", grandparent);
+    log("rotated_left", grandparent);
 
     parent.paintBlack();
     grandparent.paintRed();
-    history.log(this.clone(), "recolored_after_rotation", parent, grandparent);
+    log("recolored_after_rotation", parent, grandparent);
   }
 
   private rotateLeft(node: RBTNode) {

@@ -1,9 +1,10 @@
 import RBTNode from "./RBTNode";
-import RBTSnapshot, { OperationType } from "./RBTSnapshot";
+import RBTSnapshot from "./RBTSnapshot";
 import RBTree from "./RBTree";
+import { OperationType } from "./RBTOperationType";
 
 export default class RBTHistory {
-  snapshots: RBTSnapshot[];
+  private snapshots: RBTSnapshot[];
 
   constructor(tree: RBTree, type: OperationType, ...nodes: RBTNode[]) {
     this.snapshots = [new RBTSnapshot(tree, { type, nodes: nodes.map(n => new RBTNode(n.value, { color: n.color })) })];

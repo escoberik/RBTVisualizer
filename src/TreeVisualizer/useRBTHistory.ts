@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import RBTNode from "../RBT/RBTNode";
 import RBTHistory from "../RBT/RBTHistory";
 import RBTSnapshot from "../RBT/RBTSnapshot";
 import RBTree from "../RBT/RBTree";
@@ -20,9 +21,13 @@ export default function useRBTHistory() {
   }
 
   function insert(value: number) {
-    history.current = tree.current.insert(value);
+    const newHistory = new RBTHistory(tree.current.clone(), "new", new RBTNode(value));
+    tree.current.insert(value, (type, ...nodes) => {
+      newHistory.log(tree.current.clone(), type, ...nodes);
+    });
+    history.current = newHistory;
     setStep(0);
-    setSnapshot(history.current.getSnapshot(0)!);
+    setSnapshot(newHistory.getSnapshot(0)!);
   }
 
   return {

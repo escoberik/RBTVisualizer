@@ -57,12 +57,10 @@ export default class RBTNode {
     return this.parent?.getSibling() || null;
   }
 
-  clone(parent?: RBTNode): RBTNode {
-    return new RBTNode(this.value, {
-      color: this.color,
-      left: this.left?.clone(this) || null,
-      right: this.right?.clone(this) || null,
-      parent: parent || null,
-    });
+  clone(parent: RBTNode | null = null): RBTNode {
+    const cloned = new RBTNode(this.value, { color: this.color, parent });
+    cloned.left = this.left?.clone(cloned) ?? null;
+    cloned.right = this.right?.clone(cloned) ?? null;
+    return cloned;
   }
 }

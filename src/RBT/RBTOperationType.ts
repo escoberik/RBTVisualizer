@@ -1,0 +1,14 @@
+export type OperationType =
+  | "start"
+  | "new"
+  | "inserted_root"
+  | "comparing_left"
+  | "comparing_right"
+  | "inserted_left"
+  | "inserted_right"
+  | "recolored"
+  | "recolored_grandparent"
+  | "rotated_left"
+  | "rotated_right"
+  | "recolored_after_rotation"
+  | "repainted_root";

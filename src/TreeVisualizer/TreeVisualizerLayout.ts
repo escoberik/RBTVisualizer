@@ -1,5 +1,8 @@
 import RBTNode from "../RBT/RBTNode";
-import { NIL_RADIUS, NODE_RADIUS, PADDING, LeafNodeProperties } from "./TreeVisualizerComponents";
+
+export const NIL_RADIUS = 8;
+export const NODE_RADIUS = NIL_RADIUS * 3;
+export const PADDING = 30;
 
 const H_GAP = 20;
 const V_GAP = 50;
@@ -8,6 +11,20 @@ const COL_WIDTH = NODE_RADIUS * 2 + H_GAP;
 export const ROW_HEIGHT = NODE_RADIUS * 2 + V_GAP;
 const NIL_V_OFFSET = NODE_RADIUS + NIL_RADIUS + 24;
 export const MARGIN = NODE_RADIUS + PADDING;
+
+export interface ChildPos {
+  x: number;
+  y: number;
+  isNil: boolean;
+}
+
+export interface LeafNodeProperties {
+  node: RBTNode;
+  x: number;
+  y: number;
+  left: ChildPos;
+  right: ChildPos;
+}
 
 export class Layout {
   readonly nodes: (LeafNodeProperties & { key: string })[];
