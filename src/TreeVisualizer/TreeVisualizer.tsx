@@ -1,6 +1,4 @@
-import { useRef, useState } from "react";
-import RBTHistory from "../RBT/RBTHistory";
-import RBTree from "../RBT/RBTree";
+import useRBTHistory from "./useRBTHistory";
 import Controls from "./TreeVisualizerControls";
 import Renderer from "./TreeVisualizerRenderer";
 
@@ -9,37 +7,20 @@ function Label({ text }: { text: string }) {
 }
 
 export default function TreeVisualizer() {
-  const tree = useRef(new RBTree());
-  const history = useRef(new RBTHistory(tree.current.clone(), "start"));
-  const [step, setStep] = useState(0);
-  const [snapshot, setSnapshot] = useState(() => history.current.getSnapshot(0)!);
-
-  function show(i: number) {
-    const s = history.current.getSnapshot(i);
-    if (s) {
-      setStep(i);
-      setSnapshot(s);
-    }
-  }
-
-  function handleInsert(num: number) {
-    history.current = tree.current.insert(num);
-    setStep(0);
-    setSnapshot(history.current.getSnapshot(0)!);
-  }
+  const { snapshot, step, length, navigate, insert } = useRBTHistory();
 
   return (
     <div className="visualizer">
       <Label text={snapshot.description} />
       <Renderer snapshot={snapshot} />
       <Controls
-        onInsert={handleInsert}
-        onNext={() => show(step + 1)}
-        onPrev={() => show(step - 1)}
-        onFirst={() => show(0)}
-        onLast={() => show(history.current.length - 1)}
+        onInsert={insert}
+        onNext={() => navigate(step + 1)}
+        onPrev={() => navigate(step - 1)}
+        onFirst={() => navigate(0)}
+        onLast={() => navigate(length - 1)}
         isFirst={step === 0}
-        isLast={step === history.current.length - 1}
+        isLast={step === length - 1}
       />
     </div>
   );
