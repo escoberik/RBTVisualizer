@@ -1,8 +1,7 @@
 import RBTNode from "../RBT/RBTNode";
 import { colors } from "./colors";
-import { NIL_RADIUS, NODE_RADIUS, ChildPos, LeafNodeProperties } from "./TreeVisualizerLayout";
-
-export { NIL_RADIUS, NODE_RADIUS, ChildPos, LeafNodeProperties };
+import { NIL_RADIUS, NODE_RADIUS } from "./TreeVisualizerLayout";
+import type { LeafNodeProperties } from "./TreeVisualizerLayout";
 
 export function NilNode({ x, y }: { x: number; y: number }) {
   return (
