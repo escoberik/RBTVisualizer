@@ -1,4 +1,4 @@
-import type RBTNode from "../RBT/RBTNode";
+import type RBTNode from "../RBT/Node";
 import Snapshot, { type OperationNode } from "./Snapshot";
 import type { SnapshotType } from "./SnapshotType";
 

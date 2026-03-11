@@ -1,4 +1,4 @@
-import type RBTNode from "../RBT/RBTNode";
+import type RBTNode from "../RBT/Node";
 import type { SnapshotType } from "./SnapshotType";
 
 export type OperationNode = { value: number; red: boolean };

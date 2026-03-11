@@ -1,3 +1,3 @@
-import type { OperationType } from "../RBT/OperationType";
+import type { OperationType } from "../RBT/types";
 
 export type SnapshotType = OperationType | "new";

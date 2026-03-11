@@ -1,7 +1,14 @@
 import { colors } from "./colors";
-import { NIL_RADIUS, NODE_RADIUS } from "./Layout";
-import type { LeafNodeProperties } from "./Layout";
+import { NIL_RADIUS, NODE_RADIUS } from "./constants";
 import type { OperationNode } from "./Snapshot";
+
+export type LeafNodeProperties = {
+  x: number;
+  y: number;
+  node: OperationNode;
+  left: { x: number; y: number; isNil: boolean };
+  right: { x: number; y: number; isNil: boolean };
+};
 
 export function NilNode({ x, y }: { x: number; y: number }) {
   return (
@@ -19,7 +26,7 @@ export function NilNode({ x, y }: { x: number; y: number }) {
   );
 }
 
-function Edge({
+export function Edge({
   x,
   y,
   childRadius,
@@ -59,7 +66,7 @@ function Edge({
   );
 }
 
-function NodeBody({ node }: { node: OperationNode }) {
+export function NodeBody({ node }: { node: OperationNode }) {
   const isRed = node.red;
   return (
     <>

@@ -1,22 +1,32 @@
-import useSnapshotHistory from "./useSnapshotHistory";
-import Controls from "./Controls";
+import { useRef, useState } from "react";
+import Tree from "../RBT/Tree";
+import Layout from "../RBT/Layout";
 import Renderer from "./Renderer";
+import Controls from "./Controls";
 
 export default function TreeVisualizer() {
-  const { snapshot, isFirst, isLast, navigateFirst, navigateLast, navigateNext, navigatePrev, insert } = useSnapshotHistory();
+  const treeRef = useRef(new Tree<number>());
+  const [, setCount] = useState(0);
+
+  function handleInsert(value: number) {
+    treeRef.current.insert(value);
+    setCount((c) => c + 1);
+  }
+
+  const tree = treeRef.current;
+  const layout = new Layout(tree.root);
 
   return (
     <div className="visualizer">
-      <p>{snapshot?.description ?? "Insert a value to begin"}</p>
-      <Renderer snapshot={snapshot} />
+      <Renderer root={tree.root} layout={layout} />
       <Controls
-        onInsert={insert}
-        onNext={navigateNext}
-        onPrev={navigatePrev}
-        onFirst={navigateFirst}
-        onLast={navigateLast}
-        isFirst={isFirst}
-        isLast={isLast}
+        onInsert={handleInsert}
+        onNext={() => {}}
+        onPrev={() => {}}
+        onFirst={() => {}}
+        onLast={() => {}}
+        isFirst={true}
+        isLast={true}
       />
     </div>
   );
