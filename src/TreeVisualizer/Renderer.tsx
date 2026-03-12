@@ -1,7 +1,7 @@
 import type Node from "../RBT/Node";
 import type Layout from "./Layout";
 import SvgDefs from "./SvgDefs";
-import { TreeNode } from "./Components";
+import { TreeNode } from "./components";
 import { SLOT, PADDING } from "./constants";
 
 export default function Renderer({
