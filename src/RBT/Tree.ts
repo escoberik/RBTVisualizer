@@ -28,6 +28,7 @@ export default class RBTree<T> {
     }
 
     const p = parent as InternalNode<T>; // safe: guarded by isNil above
+    if (child.value === p.value) return; // ignore duplicates
     if (child.value < p.value) {
       if (parent.left.isNil) {
         parent.left = child;
