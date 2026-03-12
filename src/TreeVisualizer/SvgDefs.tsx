@@ -19,23 +19,23 @@ export default function SvgDefs() {
         <stop offset="100%" stopColor={colors.nodeBlackDark} />
       </radialGradient>
       <filter id="nilShadow" x="-60%" y="-60%" width="220%" height="220%">
-        <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor={colors.dropShadow} />
+        <feDropShadow dx="0" dy="0.0375" stdDeviation="0.0375" floodColor={colors.dropShadow} />
       </filter>
       <filter id="nodeRedGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colors.nodeRedGlow} floodOpacity="0.75" />
+        <feDropShadow dx="0" dy="0" stdDeviation="0.1" floodColor={colors.nodeRedGlow} floodOpacity="0.75" />
       </filter>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor={colors.dropShadow} />
+        <feDropShadow dx="0" dy="0.05" stdDeviation="0.0625" floodColor={colors.dropShadow} />
       </filter>
-      <filter id="edgeShadow" filterUnits="userSpaceOnUse" x="-1200" y="-10" width="2400" height="110">
-        <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor={colors.dropShadow} />
+      <filter id="edgeShadow" filterUnits="userSpaceOnUse" x="-50" y="-1" width="100" height="4">
+        <feDropShadow dx="0" dy="0.025" stdDeviation="0.025" floodColor={colors.dropShadow} />
       </filter>
       <linearGradient id="arrowGradient" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stopColor={colors.edge} />
         <stop offset="100%" stopColor={colors.edgeHighlight} />
       </linearGradient>
-      <marker id="arrowhead" markerWidth="10" markerHeight="18" refX="10" refY="9" orient="auto" markerUnits="userSpaceOnUse">
-        <polygon points="0 0, 10 9, 0 18, 3 9" fill="url(#arrowGradient)" stroke={colors.edgeHighlight} strokeWidth="0.75" strokeOpacity="0.6" strokeLinejoin="round" />
+      <marker id="arrowhead" markerWidth="0.25" markerHeight="0.45" refX="0.25" refY="0.225" orient="auto" markerUnits="userSpaceOnUse">
+        <polygon points="0 0, 0.25 0.225, 0 0.45, 0.075 0.225" fill="url(#arrowGradient)" stroke={colors.edgeHighlight} strokeWidth="0.02" strokeOpacity="0.6" strokeLinejoin="round" />
       </marker>
     </defs>
   );
