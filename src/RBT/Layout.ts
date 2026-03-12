@@ -4,9 +4,13 @@ import type { NodePosition } from "./types";
 class GridLine {
   constructor(
     public readonly leftOffset: number,
-    public readonly width: number,
+    private _width: number,
     public readonly rightOffset: number,
   ) {}
+
+  get width(): number {
+    return this._width;
+  }
 
   get length(): number {
     return this.leftOffset + this.width + this.rightOffset;
@@ -18,6 +22,10 @@ class GridLine {
       this.width + other.width + 1,
       other.rightOffset,
     );
+  }
+
+  setLength(length: number) {
+    this._width = length - this.leftOffset - this.rightOffset;
   }
 }
 
@@ -31,6 +39,7 @@ class Grid {
     return this.lines.length;
   }
 
+  static readonly BLANK = new Grid([new GridLine(1, 0, 1)]);
   static readonly LEAF = new Grid([new GridLine(0, 1, 0)]);
 
   static merge(left: Grid, right: Grid): Grid {
@@ -51,14 +60,12 @@ class Grid {
 
     for (let i = left.height - 2; i >= 0; i--) {
       const line = left.lines[i].concat(right.lines[i]);
-      const widthPadding = Math.max(0, baseLine.length - line.length);
-      mergedLines.push(
-        new GridLine(
-          line.leftOffset,
-          line.width + widthPadding,
-          line.rightOffset,
-        ),
-      );
+      if (line.length > baseLine.length) {
+        baseLine.setLength(line.length);
+      } else {
+        line.setLength(baseLine.length);
+      }
+      mergedLines.push(line);
     }
 
     const tip = mergedLines[mergedLines.length - 1].length;
@@ -113,9 +120,9 @@ export default class Layout<T> {
   readonly size: { width: number; height: number };
   private positions: Map<Node<T>, NodePosition> = new Map();
 
-  constructor(root: Node<T>) {
+  constructor(root: Node<T>, showNil?: boolean) {
     const grids: Grids<T> = new Map();
-    Layout.buildGrid(root, grids);
+    Layout.buildGrid(root, grids, showNil ?? false);
 
     const rootGrid = grids.get(root);
     this.size = rootGrid
@@ -131,15 +138,34 @@ export default class Layout<T> {
     return this.positions.get(node);
   }
 
-  private static buildGrid<T>(node: Node<T>, grids: Grids<T>): Grid {
-    if (node.isNil) return Grid.LEAF;
-
-    const grid = Grid.merge(
-      Layout.buildGrid(node.left, grids),
-      Layout.buildGrid(node.right, grids),
-    );
+  private static setGrid<T>(grids: Grids<T>, node: Node<T>, grid: Grid): Grid {
     grids.set(node, grid);
     return grid;
+  }
+
+  private static buildGrid<T>(
+    node: Node<T>,
+    grids: Grids<T>,
+    showNil: boolean,
+  ): Grid {
+    if (showNil) {
+      if (node.isNil) return Grid.LEAF;
+    } else {
+      if (node.isNil) return Grid.BLANK;
+
+      if (node.left.isNil && node.right.isNil) {
+        return Layout.setGrid(grids, node, Grid.LEAF);
+      }
+    }
+
+    return Layout.setGrid(
+      grids,
+      node,
+      Grid.merge(
+        Layout.buildGrid(node.left, grids, showNil),
+        Layout.buildGrid(node.right, grids, showNil),
+      ),
+    );
   }
 
   private buildPositionsForLeftNode(
