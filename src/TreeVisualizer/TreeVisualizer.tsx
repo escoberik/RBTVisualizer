@@ -18,11 +18,12 @@ export default function TreeVisualizer() {
     ref.current = { history, tree };
   }
   const { tree, history } = ref.current;
+  const layout = history.get(index)!;
 
   function insert(value: number) {
     history.reset(tree.root); // snapshot "before" state
     tree.insert(value);       // tree mutates; logFn appends "after" state
-    setIndex(history.length - 1);
+    setIndex(0);
     setVersion((v) => v + 1);
   }
 
@@ -41,7 +42,8 @@ export default function TreeVisualizer() {
 
   return (
     <div className="visualizer">
-      <Renderer layout={history.get(index)!} viewport={history.size} />
+      <p>{layout.description}</p>
+      <Renderer layout={layout} viewport={history.size} />
       <Controls
         onInsert={insert}
         onNext={goNext}

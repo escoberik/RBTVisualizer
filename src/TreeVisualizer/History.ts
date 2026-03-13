@@ -1,12 +1,20 @@
 import { EventType as RBTEventType } from "../RBT/types";
+import InternalNode from "../RBT/InternalNode";
 import type Node from "../RBT/Node";
 import Layout from "./Layout";
 
 type EventType = RBTEventType | "INITIAL";
 
 const EventDescriptions: Record<EventType, string> = {
-  INITIAL: "Initial tree",
-  INSERT: "Insert node",
+  INITIAL:                "Initial tree",
+  COMPARE_LEFT:           "Compare — go left",
+  COMPARE_RIGHT:          "Compare — go right",
+  INSERT:                 "Insert node",
+  ROTATE_LEFT:            "Rotate left",
+  ROTATE_RIGHT:           "Rotate right",
+  RECOLOR_UNCLE_RED:      "Recolor — uncle is red",
+  RECOLOR_AFTER_ROTATION: "Recolor after rotation",
+  RECOLOR_ROOT:           "Recolor root",
 };
 
 export default class History<T> {
@@ -26,8 +34,10 @@ export default class History<T> {
     return this._layouts[index];
   }
 
-  append(event: RBTEventType, root: Node<T>) {
-    const layout = new Layout<T>(EventDescriptions[event], root);
+  append(event: RBTEventType, root: Node<T>, subject: Node<T>) {
+    // subject is always InternalNode<T> — Tree never passes the sentinel here
+    const highlightValue = (subject as InternalNode<T>).value;
+    const layout = new Layout<T>(EventDescriptions[event], root, highlightValue);
     this._layouts.push(layout);
     this._size = {
       width: Math.max(this._size.width, layout.size.width),

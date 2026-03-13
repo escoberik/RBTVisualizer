@@ -10,23 +10,24 @@ export default function Renderer({
   layout: Layout<number>;
   viewport: { width: number; height: number };
 }) {
+  const halfWidth = viewport.width / 2;
   const vbWidth = viewport.width + 2 * PADDING;
   // viewport.height is a slot count, so the visual span is height-1 (first to last slot).
-  // viewport.width is already a full span, so no -1 needed there.
+  // halfWidth centers the root (offset=0) in the middle of the stable viewport.
   const vbHeight = viewport.height - 1 + 2 * PADDING;
 
   return (
     <svg
-      viewBox={`${-PADDING} ${-PADDING} ${vbWidth} ${vbHeight}`}
+      viewBox={`${-halfWidth - PADDING} ${-PADDING} ${vbWidth} ${vbHeight}`}
       width={vbWidth * SLOT}
       className="tree-svg"
     >
       <SvgDefs />
-      {[...layout.nodeLayouts.entries()].map(([node, nodeLayout]) => (
+      {[...layout.nodeLayouts.entries()].map(([value, nodeLayout]) => (
         <TreeNode
-          key={node.value}
-          value={node.value}
-          red={node.isRed}
+          key={value}
+          value={value}
+          red={nodeLayout.red}
           layout={nodeLayout}
         />
       ))}

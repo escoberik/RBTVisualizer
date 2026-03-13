@@ -17,29 +17,34 @@ export default class RBTree<T> {
     this.insertUnder(this.root, newNode);
     this.fixInsert(newNode);
     this.repaintRoot();
-    this.log("INSERT", this.root);
     return newNode;
   }
 
   private insertUnder(parent: Node<T>, child: InternalNode<T>) {
     if (parent.isNil) {
       this.root = child;
+      this.log("INSERT", child);
       return;
     }
 
     const p = parent as InternalNode<T>; // safe: guarded by isNil above
     if (child.value === p.value) return; // ignore duplicates
+
     if (child.value < p.value) {
+      this.log("COMPARE_LEFT", p);
       if (parent.left.isNil) {
         parent.left = child;
         child.parent = parent;
+        this.log("INSERT", child);
       } else {
         this.insertUnder(parent.left, child);
       }
     } else {
+      this.log("COMPARE_RIGHT", p);
       if (parent.right.isNil) {
         parent.right = child;
         child.parent = parent;
+        this.log("INSERT", child);
       } else {
         this.insertUnder(parent.right, child);
       }
@@ -71,9 +76,8 @@ export default class RBTree<T> {
   private fixUncleIsRed(parent: Node<T>, uncle: Node<T>, grandparent: Node<T>) {
     parent.paintBlack();
     uncle.paintBlack();
-
     grandparent.paintRed();
-
+    this.log("RECOLOR_UNCLE_RED", grandparent as InternalNode<T>);
     this.fixInsert(grandparent);
   }
 
@@ -88,6 +92,7 @@ export default class RBTree<T> {
 
     parent.paintBlack();
     grandparent.paintRed();
+    this.log("RECOLOR_AFTER_ROTATION", parent as InternalNode<T>);
   }
 
   private fixParentIsRight(node: Node<T>, parent: Node<T>, grandparent: Node<T>) {
@@ -101,6 +106,7 @@ export default class RBTree<T> {
 
     parent.paintBlack();
     grandparent.paintRed();
+    this.log("RECOLOR_AFTER_ROTATION", parent as InternalNode<T>);
   }
 
   private rotateLeft(node: Node<T>) {
@@ -121,6 +127,7 @@ export default class RBTree<T> {
 
     pivot.left = node;
     node.parent = pivot;
+    this.log("ROTATE_LEFT", node as InternalNode<T>);
   }
 
   private rotateRight(node: Node<T>) {
@@ -139,16 +146,16 @@ export default class RBTree<T> {
 
     pivot.right = node;
     node.parent = pivot;
+    this.log("ROTATE_RIGHT", node as InternalNode<T>);
   }
 
   private repaintRoot() {
     if (this.root.isBlack) return;
     this.root.paintBlack();
+    this.log("RECOLOR_ROOT", this.root as InternalNode<T>);
   }
 
-  private log(event: EventType, node: Node<T>) {
-    if (this.logFn) {
-      this.logFn(event, node);
-    }
+  private log(event: EventType, subject: InternalNode<T>) {
+    this.logFn?.(event, this.root, subject);
   }
 }
