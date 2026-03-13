@@ -17,13 +17,13 @@ export default class RBTree<T> {
     this.insertUnder(this.root, newNode);
     this.fixInsert(newNode);
     this.repaintRoot();
+    this.log("INSERT", this.root);
     return newNode;
   }
 
   private insertUnder(parent: Node<T>, child: InternalNode<T>) {
     if (parent.isNil) {
       this.root = child;
-      this.log("INSERT", child);
       return;
     }
 
