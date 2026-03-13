@@ -8,13 +8,26 @@ export default function SvgDefs() {
         <stop offset="55%"  stopColor={colors.nodeRed} />
         <stop offset="100%" stopColor={colors.nodeRedDark} />
       </radialGradient>
+      <radialGradient id="nodeRedHighlightGradient" cx="35%" cy="30%" r="65%">
+        <stop offset="0%"   stopColor={colors.nodeRedHighlightSpecular} />
+        <stop offset="45%"  stopColor={colors.nodeRed} />
+        <stop offset="100%" stopColor={colors.nodeRedDark} />
+      </radialGradient>
       <radialGradient id="nodeBlackGradient" cx="35%" cy="30%" r="65%">
         <stop offset="0%"   stopColor={colors.nodeBlackHighlight} />
         <stop offset="55%"  stopColor={colors.nodeBlack} />
         <stop offset="100%" stopColor={colors.nodeBlackDark} />
       </radialGradient>
+      <radialGradient id="nodeBlackHighlightGradient" cx="35%" cy="30%" r="65%">
+        <stop offset="0%"   stopColor={colors.nodeBlackHighlightSpecular} />
+        <stop offset="45%"  stopColor={colors.nodeBlack} />
+        <stop offset="100%" stopColor={colors.nodeBlackDark} />
+      </radialGradient>
       <filter id="nodeRedGlow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="0" stdDeviation="0.1" floodColor={colors.nodeRedGlow} floodOpacity="0.75" />
+      </filter>
+      <filter id="nodeHighlightRing" x="-80%" y="-80%" width="260%" height="260%">
+        <feDropShadow dx="0" dy="0" stdDeviation="0.2" floodColor="white" floodOpacity="0.5" />
       </filter>
       <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="0.05" stdDeviation="0.0625" floodColor={colors.dropShadow} />

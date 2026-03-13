@@ -1,14 +1,37 @@
 import { colors } from "../colors";
 import { NODE_RADIUS } from "../constants";
 
-export function NodeBody({ value, red }: { value: number; red: boolean }) {
+export function NodeBody({
+  value,
+  red,
+  highlight,
+}: {
+  value: number;
+  red: boolean;
+  highlight: boolean;
+}) {
   return (
     <>
+      {highlight && (
+        <circle
+          cx={0}
+          cy={0}
+          r={NODE_RADIUS + 0.1}
+          fill="none"
+          stroke={red ? colors.nodeRedRing : colors.nodeBlackRing}
+          strokeWidth={0.06}
+          filter="url(#nodeHighlightRing)"
+        />
+      )}
       <circle
         cx={0}
         cy={0}
         r={NODE_RADIUS}
-        fill={red ? "url(#nodeRedGradient)" : "url(#nodeBlackGradient)"}
+        fill={
+          highlight
+            ? red ? "url(#nodeRedHighlightGradient)" : "url(#nodeBlackHighlightGradient)"
+            : red ? "url(#nodeRedGradient)"           : "url(#nodeBlackGradient)"
+        }
         stroke={red ? colors.nodeRedDark : colors.nodeBlackDark}
         strokeWidth={0.025}
         filter={red ? "url(#nodeRedGlow)" : "url(#nodeShadow)"}

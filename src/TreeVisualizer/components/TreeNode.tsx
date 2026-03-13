@@ -5,7 +5,7 @@ import { NodeBody } from "./NodeBody";
 export function TreeNode({
   value,
   red,
-  layout: { offset, level, leftDistance, rightDistance },
+  layout: { offset, level, leftDistance, rightDistance, highlight },
 }: {
   value: number;
   red: boolean;
@@ -16,7 +16,7 @@ export function TreeNode({
       {/* !== undefined, not truthy check: distance=0 is a valid vertical edge */}
       {leftDistance !== undefined && <Edge distance={-leftDistance} />}
       {rightDistance !== undefined && <Edge distance={rightDistance} />}
-      <NodeBody value={value} red={red} />
+      <NodeBody value={value} red={red} highlight={highlight} />
     </g>
   );
 }
