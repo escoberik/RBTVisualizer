@@ -1,13 +1,13 @@
-import type Layout from "./Layout";
+import type { AnimatedLayout } from "./useLayoutTransition";
 import SvgDefs from "./SvgDefs";
-import { TreeNode, NodeBody } from "./components";
+import { TreeNode, Edge, NodeBody } from "./components";
 import { SLOT, PADDING } from "./constants";
 
 export default function Renderer({
   layout,
   viewport,
 }: {
-  layout: Layout<number>;
+  layout: AnimatedLayout<number>;
   viewport: { width: number; height: number };
 }) {
   const halfWidth = viewport.width / 2;
@@ -23,17 +23,35 @@ export default function Renderer({
       className="tree-svg"
     >
       <SvgDefs />
+      {layout.edges.map((edge, i) => {
+        const parent = layout.nodeLayouts.get(edge.parent);
+        const child = layout.nodeLayouts.get(edge.child);
+        if (!parent || !child) return null;
+        const dx = child.offset - parent.offset;
+        const dy = child.level - parent.level;
+        return (
+          <g
+            key={i}
+            transform={`translate(${parent.offset}, ${parent.level})`}
+            opacity={edge.opacity}
+          >
+            <Edge dx={dx} dy={dy} />
+          </g>
+        );
+      })}
       {[...layout.nodeLayouts.entries()].map(([value, nodeLayout]) => (
         <TreeNode
           key={value}
           value={value}
-          red={nodeLayout.red}
           layout={nodeLayout}
         />
       ))}
       {layout.floatingNode && (
-        <g transform={`translate(${layout.floatingNode.offset}, ${layout.floatingNode.level})`}>
-          <NodeBody value={layout.floatingNode.value} red={true} highlight={true} />
+        <g
+          transform={`translate(${layout.floatingNode.offset}, ${layout.floatingNode.level})`}
+          opacity={layout.floatingNode.opacity}
+        >
+          <NodeBody value={layout.floatingNode.value} colorT={1} highlightT={1} />
         </g>
       )}
     </svg>

@@ -1,8 +1,8 @@
 import { colors } from "../colors";
-import { LEVEL_GAP, NODE_RADIUS } from "../constants";
+import { NODE_RADIUS } from "../constants";
 
-export function Edge({ distance }: { distance: number }) {
-  const len = Math.sqrt(distance * distance + LEVEL_GAP * LEVEL_GAP);
+export function Edge({ dx, dy }: { dx: number; dy: number }) {
+  const len = Math.sqrt(dx * dx + dy * dy);
   const scale = (len - NODE_RADIUS) / len;
 
   return (
@@ -10,8 +10,8 @@ export function Edge({ distance }: { distance: number }) {
       <line
         x1={0}
         y1={0}
-        x2={distance * scale}
-        y2={LEVEL_GAP * scale}
+        x2={dx * scale}
+        y2={dy * scale}
         stroke={colors.edge}
         strokeWidth={0.1}
         strokeLinecap="round"
@@ -20,8 +20,8 @@ export function Edge({ distance }: { distance: number }) {
       <line
         x1={0}
         y1={0}
-        x2={distance * scale}
-        y2={LEVEL_GAP * scale}
+        x2={dx * scale}
+        y2={dy * scale}
         stroke={colors.edgeHighlight}
         strokeWidth={0.03}
         strokeLinecap="round"

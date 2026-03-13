@@ -7,8 +7,11 @@ export interface NodeLayout {
   highlight: boolean;
   offset: number;
   level: number;
-  leftDistance?: number;
-  rightDistance?: number;
+}
+
+export interface EdgeDef<T> {
+  parent: T;
+  child: T;
 }
 
 export interface FloatingNode<T> {
@@ -21,9 +24,14 @@ export default class Layout<T> {
   readonly size: { width: number; height: number };
   readonly floatingNode: FloatingNode<T> | undefined;
   private _nodeLayouts: Map<T, NodeLayout> = new Map();
+  private _edges: EdgeDef<T>[] = [];
 
   get nodeLayouts(): ReadonlyMap<T, NodeLayout> {
     return this._nodeLayouts;
+  }
+
+  get edges(): ReadonlyArray<EdgeDef<T>> {
+    return this._edges;
   }
 
   constructor(
@@ -69,29 +77,21 @@ export default class Layout<T> {
       level: nodeLevel,
     };
 
-    // Floating node hovers 0.5 units above the highlighted node
+    // Floating node hovers 1.5 units above the highlighted node
     let floatingNode: FloatingNode<T> | undefined;
     if (floatingValue !== undefined && node.value === highlightValue) {
       floatingNode = { value: floatingValue, offset: relativeOffset, level: nodeLevel - 1.5 };
     }
 
     let leftFloating: FloatingNode<T> | undefined;
-    if (node.left.isNil) {
-      // Nil children in the showNil layout always land at distance 1 —
-      // Grid.LEAF (width 1, leftOffset 0) is always packed adjacent to the parent.
-      if (showNil) layout.leftDistance = 1;
-    } else {
-      layout.leftDistance =
-        offset - rbtLayout.getNodePosition(node.left)!.offset;
+    if (!node.left.isNil) {
+      this._edges.push({ parent: node.value, child: (node.left as InternalNode<T>).value });
       leftFloating = this.build(node.left as InternalNode<T>, rbtLayout, highlightValue, floatingValue, showNil, rootOffset);
     }
 
     let rightFloating: FloatingNode<T> | undefined;
-    if (node.right.isNil) {
-      if (showNil) layout.rightDistance = 1;
-    } else {
-      layout.rightDistance =
-        rbtLayout.getNodePosition(node.right)!.offset - offset;
+    if (!node.right.isNil) {
+      this._edges.push({ parent: node.value, child: (node.right as InternalNode<T>).value });
       rightFloating = this.build(node.right as InternalNode<T>, rbtLayout, highlightValue, floatingValue, showNil, rootOffset);
     }
 

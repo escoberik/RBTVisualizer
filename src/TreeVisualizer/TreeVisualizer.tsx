@@ -3,6 +3,7 @@ import Tree from "../RBT/Tree";
 import History from "./History";
 import Renderer from "./Renderer";
 import Controls from "./Controls";
+import { useLayoutTransition } from "./useLayoutTransition";
 
 export default function TreeVisualizer() {
   const [index, setIndex] = useState(0);
@@ -18,7 +19,7 @@ export default function TreeVisualizer() {
     ref.current = { history, tree };
   }
   const { tree, history } = ref.current;
-  const layout = history.get(index)!;
+  const animated = useLayoutTransition(history.get(index)!);;
 
   function insert(value: number) {
     history.reset(tree.root, value); // snapshot "before" state; value floats in
@@ -42,8 +43,8 @@ export default function TreeVisualizer() {
 
   return (
     <div className="visualizer">
-      <p>{layout.description}</p>
-      <Renderer layout={layout} viewport={history.size} />
+      <p>{animated.description}</p>
+      <Renderer layout={animated} viewport={history.size} />
       <Controls
         onInsert={insert}
         onNext={goNext}

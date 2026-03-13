@@ -1,22 +1,18 @@
-import type { NodeLayout } from "../Layout";
-import { Edge } from "./Edge";
+import type { AnimatedNodeLayout } from "../useLayoutTransition";
 import { NodeBody } from "./NodeBody";
 
 export function TreeNode({
   value,
-  red,
-  layout: { offset, level, leftDistance, rightDistance, highlight },
+  layout: { offset, level, colorT, highlightT, opacity, scale },
 }: {
   value: number;
-  red: boolean;
-  layout: NodeLayout;
+  layout: AnimatedNodeLayout;
 }) {
   return (
-    <g transform={`translate(${offset}, ${level})`}>
-      {/* !== undefined, not truthy check: distance=0 is a valid vertical edge */}
-      {leftDistance !== undefined && <Edge distance={-leftDistance} />}
-      {rightDistance !== undefined && <Edge distance={rightDistance} />}
-      <NodeBody value={value} red={red} highlight={highlight} />
+    <g transform={`translate(${offset}, ${level})`} opacity={opacity}>
+      <g transform={`scale(${scale})`}>
+        <NodeBody value={value} colorT={colorT} highlightT={highlightT} />
+      </g>
     </g>
   );
 }
