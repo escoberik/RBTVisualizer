@@ -1,0 +1,36 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to escoberik.github.io
+        env:
+          PAGES_DEPLOY_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+        run: |
+          git clone https://x-access-token:${PAGES_DEPLOY_TOKEN}@github.com/escoberik/escoberik.github.io.git pages-repo
+          rm -rf pages-repo/rbtree-visualizer
+          cp -r dist pages-repo/rbtree-visualizer
+          cd pages-repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add rbtree-visualizer
+          git diff --cached --quiet || git commit -m "Deploy rbtree-visualizer"
+          git push
