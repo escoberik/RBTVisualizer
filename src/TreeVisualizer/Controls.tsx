@@ -57,10 +57,7 @@ export default function Controls({
             setInvalid(false);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleInsert();
-              onLast();
-            }
+            if (e.key === "Enter") handleInsert();
           }}
         />
         <button onClick={handleInsert}>Insert</button>

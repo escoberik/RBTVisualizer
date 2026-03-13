@@ -9,8 +9,5 @@ export const colors = {
   nodeText:         "#ffffff",
   edge:             "#6b7f94",
   edgeHighlight:    "#c8d8e8",
-  nil:              "#6b7280",
-  nilHighlight:     "#c5cdd8",
-  nilDark:          "#374151",
   dropShadow:       "#00000070",
 } as const;

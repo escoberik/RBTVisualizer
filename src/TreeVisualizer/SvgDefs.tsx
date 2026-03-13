@@ -3,11 +3,6 @@ import { colors } from "./colors";
 export default function SvgDefs() {
   return (
     <defs>
-      <radialGradient id="nilGradient" cx="35%" cy="30%" r="65%">
-        <stop offset="0%" stopColor={colors.nilHighlight} />
-        <stop offset="50%" stopColor={colors.nil} />
-        <stop offset="100%" stopColor={colors.nilDark} />
-      </radialGradient>
       <radialGradient id="nodeRedGradient" cx="35%" cy="30%" r="65%">
         <stop offset="0%"   stopColor={colors.nodeRedHighlight} />
         <stop offset="55%"  stopColor={colors.nodeRed} />
@@ -18,9 +13,6 @@ export default function SvgDefs() {
         <stop offset="55%"  stopColor={colors.nodeBlack} />
         <stop offset="100%" stopColor={colors.nodeBlackDark} />
       </radialGradient>
-      <filter id="nilShadow" x="-60%" y="-60%" width="220%" height="220%">
-        <feDropShadow dx="0" dy="0.0375" stdDeviation="0.0375" floodColor={colors.dropShadow} />
-      </filter>
       <filter id="nodeRedGlow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="0" stdDeviation="0.1" floodColor={colors.nodeRedGlow} floodOpacity="0.75" />
       </filter>

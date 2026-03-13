@@ -1,22 +1,19 @@
-import type Node from "../RBT/Node";
 import type Layout from "./Layout";
 import SvgDefs from "./SvgDefs";
 import { TreeNode } from "./components";
 import { SLOT, PADDING } from "./constants";
 
 export default function Renderer({
-  root,
   layout,
+  viewport,
 }: {
-  root: Node<number>;
   layout: Layout<number>;
+  viewport: { width: number; height: number };
 }) {
-  if (root.isNil) return null;
-
-  const vbWidth = layout.size.width + 2 * PADDING;
-  // size.height is a slot count, so the visual span is size.height-1 (first to last slot).
-  // size.width is already a full span, so no -1 needed there.
-  const vbHeight = layout.size.height - 1 + 2 * PADDING;
+  const vbWidth = viewport.width + 2 * PADDING;
+  // viewport.height is a slot count, so the visual span is height-1 (first to last slot).
+  // viewport.width is already a full span, so no -1 needed there.
+  const vbHeight = viewport.height - 1 + 2 * PADDING;
 
   return (
     <svg
@@ -28,7 +25,8 @@ export default function Renderer({
       {[...layout.nodeLayouts.entries()].map(([node, nodeLayout]) => (
         <TreeNode
           key={node.value}
-          node={node}
+          value={node.value}
+          red={node.isRed}
           layout={nodeLayout}
         />
       ))}

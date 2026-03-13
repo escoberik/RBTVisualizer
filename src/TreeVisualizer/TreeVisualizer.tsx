@@ -1,30 +1,55 @@
-import { useRef, useState } from "react";
+import { useState, useRef } from "react";
 import Tree from "../RBT/Tree";
-import Layout from "./Layout";
+import History from "./History";
 import Renderer from "./Renderer";
 import Controls from "./Controls";
 
 export default function TreeVisualizer() {
-  const treeRef = useRef(new Tree<number>());
-  const [layout, setLayout] = useState(new Layout(treeRef.current.root));
+  const [index, setIndex] = useState(0);
+  const [, setVersion] = useState(0);
 
-  function handleInsert(value: number) {
-    treeRef.current.insert(value);
-    setLayout(new Layout(treeRef.current.root)); 
+  const ref = useRef<{ tree: Tree<number>; history: History<number> } | null>(
+    null,
+  );
+  if (!ref.current) {
+    const history = new History<number>();
+    const tree = new Tree<number>(history.append.bind(history));
+    history.reset(tree.root);
+    ref.current = { history, tree };
+  }
+  const { tree, history } = ref.current;
+
+  function insert(value: number) {
+    history.reset(tree.root); // snapshot "before" state
+    tree.insert(value);       // tree mutates; logFn appends "after" state
+    setIndex(history.length - 1);
+    setVersion((v) => v + 1);
   }
 
-  const {root} = treeRef.current;
+  function goNext() {
+    setIndex((i) => Math.min(i + 1, history.length - 1));
+  }
+  function goPrev() {
+    setIndex((i) => Math.max(i - 1, 0));
+  }
+  function goFirst() {
+    setIndex(0);
+  }
+  function goLast() {
+    setIndex(history.length - 1);
+  }
+
   return (
     <div className="visualizer">
-      <Renderer root={root} layout={layout} />
+      <Renderer layout={history.get(index)!} viewport={history.size} />
       <Controls
-        onInsert={handleInsert}
-        onNext={() => {}}
-        onPrev={() => {}}
-        onFirst={() => {}}
-        onLast={() => {}}
-        isFirst={true}
-        isLast={true}
+        onInsert={insert}
+        onNext={goNext}
+        onPrev={goPrev}
+        onFirst={goFirst}
+        onLast={goLast}
+        isFirst={index === 0}
+        isLast={index === history.length - 1}
       />
     </div>
   );

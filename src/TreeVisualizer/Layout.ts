@@ -17,7 +17,11 @@ export default class Layout<T> {
     return this._nodeLayouts;
   }
 
-  constructor(root: Node<T>, showNil = false) {
+  constructor(
+    public readonly description: string,
+    root: Node<T>,
+    showNil = false,
+  ) {
     const rbtLayout = new RBTLayout(root, showNil);
     const { width, height } = rbtLayout.size;
     this.size = { width, height: height === 0 ? 0 : height * 2 - 1 };
