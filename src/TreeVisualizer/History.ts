@@ -22,6 +22,8 @@ export default class History<T> {
   // The viewBox must stay stable while stepping through history — use the
   // largest width and height across all layouts so it never shrinks mid-replay.
   private _size: { width: number; height: number } = { width: 0, height: 0 };
+  // Value currently being inserted — carried into every layout as the floating node.
+  private _floatingValue: T | undefined;
 
   get size() {
     return this._size;
@@ -37,7 +39,8 @@ export default class History<T> {
   append(event: RBTEventType, root: Node<T>, subject: Node<T>) {
     // subject is always InternalNode<T> — Tree never passes the sentinel here
     const highlightValue = (subject as InternalNode<T>).value;
-    const layout = new Layout<T>(EventDescriptions[event], root, highlightValue);
+    const showFloating = event === "COMPARE_LEFT" || event === "COMPARE_RIGHT";
+    const layout = new Layout<T>(EventDescriptions[event], root, highlightValue, showFloating ? this._floatingValue : undefined);
     this._layouts.push(layout);
     this._size = {
       width: Math.max(this._size.width, layout.size.width),
@@ -45,8 +48,9 @@ export default class History<T> {
     };
   }
 
-  reset(root: Node<T>) {
-    const initial = new Layout<T>(EventDescriptions.INITIAL, root);
+  reset(root: Node<T>, floatingValue?: T) {
+    this._floatingValue = floatingValue;
+    const initial = new Layout<T>(EventDescriptions.INITIAL, root, undefined, floatingValue);
     this._layouts = [initial];
     this._size = { width: initial.size.width, height: initial.size.height };
   }

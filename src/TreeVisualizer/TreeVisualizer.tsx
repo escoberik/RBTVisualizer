@@ -14,14 +14,14 @@ export default function TreeVisualizer() {
   if (!ref.current) {
     const history = new History<number>();
     const tree = new Tree<number>(history.append.bind(history));
-    history.reset(tree.root);
+    history.reset(tree.root); // initial empty-tree snapshot, no floating node
     ref.current = { history, tree };
   }
   const { tree, history } = ref.current;
   const layout = history.get(index)!;
 
   function insert(value: number) {
-    history.reset(tree.root); // snapshot "before" state
+    history.reset(tree.root, value); // snapshot "before" state; value floats in
     tree.insert(value);       // tree mutates; logFn appends "after" state
     setIndex(0);
     setVersion((v) => v + 1);

@@ -127,7 +127,7 @@ export default class RBTree<T> {
 
     pivot.left = node;
     node.parent = pivot;
-    this.log("ROTATE_LEFT", node as InternalNode<T>);
+    this.log("ROTATE_LEFT", pivot as InternalNode<T>);
   }
 
   private rotateRight(node: Node<T>) {
@@ -146,7 +146,7 @@ export default class RBTree<T> {
 
     pivot.right = node;
     node.parent = pivot;
-    this.log("ROTATE_RIGHT", node as InternalNode<T>);
+    this.log("ROTATE_RIGHT", pivot as InternalNode<T>);
   }
 
   private repaintRoot() {

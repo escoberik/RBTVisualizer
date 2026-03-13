@@ -1,6 +1,6 @@
 import type Layout from "./Layout";
 import SvgDefs from "./SvgDefs";
-import { TreeNode } from "./components";
+import { TreeNode, NodeBody } from "./components";
 import { SLOT, PADDING } from "./constants";
 
 export default function Renderer({
@@ -14,11 +14,11 @@ export default function Renderer({
   const vbWidth = viewport.width + 2 * PADDING;
   // viewport.height is a slot count, so the visual span is height-1 (first to last slot).
   // halfWidth centers the root (offset=0) in the middle of the stable viewport.
-  const vbHeight = viewport.height - 1 + 2 * PADDING;
+  const vbHeight = viewport.height - 1 + 2 * PADDING + 0.5;
 
   return (
     <svg
-      viewBox={`${-halfWidth - PADDING} ${-PADDING} ${vbWidth} ${vbHeight}`}
+      viewBox={`${-halfWidth - PADDING} ${-PADDING - 0.5} ${vbWidth} ${vbHeight}`}
       width={vbWidth * SLOT}
       className="tree-svg"
     >
@@ -31,6 +31,11 @@ export default function Renderer({
           layout={nodeLayout}
         />
       ))}
+      {layout.floatingNode && (
+        <g transform={`translate(${layout.floatingNode.offset}, ${layout.floatingNode.level})`}>
+          <NodeBody value={layout.floatingNode.value} red={true} highlight={true} />
+        </g>
+      )}
     </svg>
   );
 }
