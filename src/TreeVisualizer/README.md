@@ -1,246 +1,190 @@
 # TreeVisualizer
 
-`TreeVisualizer` is the rendering layer for the Red-Black Tree. It takes the
-pure-math output of `RBT/Layout` and turns it into an interactive SVG
-visualization. The module is organized in a deliberate pipeline — each layer
-knows as little as possible about the layers below it.
+The rendering and animation layer for the Red-Black Tree visualizer. Takes the
+pure-math output of `RBT/` and turns it into an interactive, animated SVG. Each
+layer in this pipeline knows as little as possible about the layers below it.
 
 ---
 
-## Architecture
+## Pipeline overview
 
 ```
-RBT/Tree  ──→  TreeVisualizer/Layout  ──→  Renderer  ──→  SVG
-              (grid coordinates)       (React + SVG)
-                     ↑
-               RBT/Layout (internal)
+RBT/Tree  ──(LogFn)──→  History  ──→  Layout  ──→  useLayoutTransition  ──→  Renderer  ──→  SVG
+            events        snapshots     positions       animated positions
 ```
 
-- **`RBT/Layout`** — pure math. Computes integer slot positions. No rendering
-  knowledge whatsoever.
-- **`TreeVisualizer/Layout`** — visualization adapter. Wraps `RBT/Layout` as
-  an implementation detail, enriches positions with edge distances, and applies
-  the square-grid transform. The only public surface for consumers.
-- **`Renderer`** — React component. Translates a `Layout` into SVG elements.
-  Has no layout logic.
-- **`components/`** — individual SVG primitives (`TreeNode`, `Edge`,
-  `NodeBody`), each in its own file. All values in grid units.
+1. `RBT/Tree` mutates itself and fires events through the `LogFn` callback.
+2. `History` catches those events, wraps each in a `Layout` snapshot, and
+   stores the sequence.
+3. `TreeVisualizer` (the root component) navigates `History` by index.
+4. `useLayoutTransition` interpolates between the current and previous
+   `Layout` over 1 second using `requestAnimationFrame`.
+5. `Renderer` maps the `AnimatedLayout` to SVG elements.
 
 ---
 
 ## Coordinate system
 
-All SVG internals use **grid units**, not pixels. A single constant, `SLOT`,
-converts grid units to pixels exactly once — in the SVG `width` attribute:
+All SVG internals use **grid units**, not pixels. `SLOT = 40` is the only
+place that converts grid units to pixels, used exclusively in the SVG `width`
+attribute:
 
 ```typescript
-width={vbWidth * SLOT}   // e.g. 10 grid units × 40px = 400px
+width={vbWidth * SLOT}   // e.g. 10 units × 40px/unit = 400px
 ```
 
-Everything else — radii, stroke widths, font sizes, filter offsets, marker
-dimensions — is expressed as a fraction of `SLOT`. For example, `NODE_RADIUS =
-0.55` means 22 px when `SLOT = 40`. This keeps all component code
-scale-independent: changing `SLOT` rescales the entire visualization.
+Everything else — radii, stroke widths, font sizes, filter offsets — is a
+fraction of one grid unit. `NODE_RADIUS = 0.55` means 22 px at the default
+scale. Changing `SLOT` rescales the entire visualization uniformly.
 
-### The square grid
+### Level doubling
 
-`RBT/Layout` assigns each node an integer `(offset, level)` position where
-adjacent levels differ by 1. At this scale, horizontal and vertical spacing
-are different: nodes are 1 unit apart horizontally but 1 unit apart
-vertically, leaving no room for arrows between levels.
-
-`TreeVisualizer/Layout` solves this by **doubling all levels**:
+`RBT/Layout` assigns each node an integer `level` starting at 0. Adjacent
+levels are 1 unit apart — not enough vertical space for arrow glyphs.
+`TreeVisualizer/Layout` doubles all levels before storing them:
 
 ```
-RBT levels:  0, 1, 2, 3, ...
-TV levels:   0, 2, 4, 6, ...
+RBT level:  0  1  2  3  …
+TV level:   0  2  4  6  …
 ```
 
-Nodes land on even slots; the odd slots between them are reserved for the
-arrow space. Because the same `SLOT` constant applies to both axes, each grid
-cell is square: 1 grid unit wide and 1 grid unit tall. `LEVEL_GAP = 2`
-documents the vertical distance between a node and its children as a
-consequence of the level doubling.
-
-The total height of the SVG grid in slots is `height * 2 - 1`, not `height *
-2`, because there is no arrow row below the deepest level.
+Nodes land on even slots; the odd slots between them hold the arrows.
+`LEVEL_GAP = 2` records this vertical distance between parent and child.
 
 ---
 
-## `Layout.ts`
+## Files
 
-`Layout<T>` is the only public entry point for computing visualization
-positions. It wraps `RBTLayout` entirely; consumers never interact with
-`RBT/Layout` directly.
+### `TreeVisualizer.tsx` — root component
 
-### `NodeLayout`
+Owns the `Tree` and `History` instances in a stable ref (never recreated on
+re-render). On each insert:
+
+1. Calls `history.reset(tree.root, value)` to snapshot the before-state with
+   the inserting value floating.
+2. Calls `tree.insert(value)`, which fires events through `history.append`.
+3. Resets the step index to 0 so playback starts from the beginning.
+
+Step navigation (first / prev / next / last) moves the index through
+`history`'s snapshot array.
+
+### `History.ts` — snapshot collector
+
+`History<T>` receives `(event, root, subject)` callbacks from `RBT/Tree` and
+stores each as a `Layout<T>` with a human-readable description. It also tracks
+`_floatingValue` — the value being inserted — and injects it into `Layout` so
+the floating node animation knows which node to float.
+
+A stable `size` property tracks the maximum `{ width, height }` seen across all
+snapshots. `Renderer` uses this to keep the SVG viewport constant while
+stepping through history, preventing layout jumps as the tree grows.
+
+### `Layout.ts` — visualization adapter
+
+`Layout<T>` wraps `RBT/Layout` and produces data structures that `Renderer`
+and `useLayoutTransition` can consume directly.
+
+**`NodeLayout`:**
 
 ```typescript
 interface NodeLayout {
-  offset: number;         // absolute horizontal grid coordinate
-  level: number;          // absolute vertical grid coordinate (doubled from RBT level)
-  leftDistance?: number;  // horizontal distance to left child (undefined if none)
-  rightDistance?: number; // horizontal distance to right child (undefined if none)
+  red: boolean;       // true → red node
+  highlight: boolean; // true → active node for this step
+  offset: number;     // horizontal grid coordinate (root-relative)
+  level: number;      // vertical grid coordinate (doubled)
 }
 ```
 
-`leftDistance` and `rightDistance` are positive numbers representing the
-horizontal span from the node to its child. The sign is handled at render time:
-`<Edge distance={-leftDistance} />` points left, `<Edge distance={rightDistance} />`
-points right.
+All offsets are **root-relative**: the root is always at offset 0, children
+are ± from it. This is what keeps the viewport centered on the root across all
+steps.
 
-### Nil children
+**Floating node:** during `COMPARE_LEFT` / `COMPARE_RIGHT` steps, a floating
+node (the value being inserted) hovers 1.5 units above the highlighted
+comparison node. If no highlight match exists (e.g., `INITIAL`), it floats to
+the left of the tree. On an empty tree it hovers at center-left.
 
-When `showNil = false` (the default), nil children have no entry in
-`nodeLayouts` and `leftDistance`/`rightDistance` are `undefined` for nodes
-whose children are nil. When `showNil = true`, nil children get
-`distance = 1` — `Grid.LEAF` always packs a nil sentinel one slot adjacent
-to its parent.
+**Edges:** stored as `{ parent: T, child: T }` pairs. Positions are computed
+at render time from the animated node layouts, so edges correctly track nodes
+during movement.
 
-### Public access
+### `useLayoutTransition.ts` — animation hook
 
-`nodeLayouts` is exposed as a `ReadonlyMap<InternalNode<T>, NodeLayout>`:
-consumers can iterate with `.entries()`, look up nodes with `.get()`, and
-check presence with `.has()`, but cannot mutate the map.
+Drives smooth transitions between `Layout` snapshots using
+`requestAnimationFrame`. Returns an `AnimatedLayout<T>` whose numeric fields
+are linearly interpolated between the previous and next `Layout` with an
+ease-in-out curve.
 
-The map is keyed on `InternalNode<T>` (never the abstract `Node<T>`), so
-consumers get full type-safe access to `.value` without any cast.
+**Interpolated fields per node:**
 
----
+| Field | From → To |
+|-------|-----------|
+| `offset` | previous position → new position |
+| `level` | previous level → new level |
+| `colorT` | `0` (black) or `1` (red) → new color value |
+| `highlightT` | `0` (normal) or `1` (highlighted) → new value |
+| `opacity` | `1 → 0` (disappearing) or `0 → 1` (appearing) |
+| `scale` | `0 → 1` for newly popped-in nodes |
 
-## Rendering pipeline
+**Special cases:**
 
-### `TreeVisualizer` (root component)
+- **Floating node landing** — when the floating node enters the tree, its tree
+  node animates from the floating position to its final slot. The separate
+  floating node is hidden for that step.
+- **Floating node lifting off** — the reverse: tree node slides to the floating
+  position; the floating node hides.
+- **Same floating value across steps** — the floating node smoothly moves
+  between its positions in consecutive layouts.
 
-Owns the `Tree` instance in a ref (stable across renders) and the current
-`Layout` in state. On every insert, it rebuilds the layout and re-renders:
+**Edge interpolation:** edges that exist in both `from` and `to` layouts keep
+`opacity = 1`. Disappearing edges fade out; appearing edges fade in.
 
-```typescript
-function handleInsert(value: number) {
-  treeRef.current.insert(value);
-  setLayout(new Layout(treeRef.current.root));
-}
-```
+When `progressRef.current >= 1` (animation complete), the hook returns a frozen
+snapshot to avoid per-frame recalculation at rest.
 
-Renders `<Renderer>` for the SVG and `<Controls>` for the input UI.
+### `Renderer.tsx` — SVG composer
 
-### `Renderer`
+Sets up the SVG `viewBox` to fit the stable `viewport` size with `PADDING`
+whitespace around the tree, then renders:
 
-Sets up the SVG viewport and iterates `layout.nodeLayouts.entries()` to
-render one `<TreeNode>` per internal node. Uses absolute grid coordinates,
-so nodes position themselves independently with no parent-relative
-arithmetic:
+1. **Edges** — one `<Edge>` per `AnimatedEdge`, translated to the parent node's
+   animated position. `dx` and `dy` are computed from the difference in
+   animated offsets and levels at render time.
+2. **Tree nodes** — one `<TreeNode>` per entry in `nodeLayouts`.
+3. **Floating node** — if present, a bare `<NodeBody>` translated to the
+   floating position (always red, always highlighted).
 
-```typescript
-{[...layout.nodeLayouts.entries()].map(([node, nodeLayout]) => (
-  <TreeNode key={node.value} node={node} layout={nodeLayout} />
-))}
-```
+Edges are rendered before nodes so arrowheads sit beneath node circles.
 
-- The `viewBox` origin is offset by `-PADDING` on both axes to add whitespace
-  around the tree.
-- `vbHeight = size.height - 1 + 2 * PADDING`: the `-1` accounts for
-  `size.height` being a slot count — the visual span from the first slot to
-  the last is `height - 1`.
+### `SvgDefs.tsx` — shared SVG resources
 
-### `TreeNode`
-
-A `<g>` translated to `(offset, level)` that renders its own edges before
-its body:
-
-```tsx
-<g transform={`translate(${offset}, ${level})`}>
-  {/* !== undefined, not truthy check: distance=0 is a valid vertical edge */}
-  {leftDistance !== undefined && <Edge distance={-leftDistance} />}
-  {rightDistance !== undefined && <Edge distance={rightDistance} />}
-  <NodeBody value={value} red={node.isRed} />
-</g>
-```
-
-Edges are rendered before `NodeBody` so the node circle appears on top of the
-arrow tips.
-
-### `Edge`
-
-Draws an arrow from the node's center toward its child. Given `distance` (signed
-horizontal offset) and `LEVEL_GAP` (vertical offset), it computes the arrow's
-endpoint shortened by `NODE_RADIUS` so the tip meets the child circle's edge
-rather than its center:
-
-```typescript
-const x = distance;
-const y = LEVEL_GAP;
-const len = Math.sqrt(x * x + y * y);
-const scale = (len - NODE_RADIUS) / len;
-// endpoint: (x * scale, y * scale)
-```
-
-Rendered as two overlapping `<line>` elements: a thicker base stroke and a
-thinner highlight stroke to give the edge a glossy look.
-
-### `NodeBody`
-
-A `<circle>` with a radial gradient fill and a `<text>` label centered over
-it. Takes plain `{ value: number; red: boolean }` — no dependency on
-`InternalNode` or any animation type.
-
----
-
-## `SvgDefs`
-
-Defines all reusable SVG resources referenced by ID elsewhere:
+Currently defines one shared filter:
 
 | ID | Type | Used by |
 |----|------|---------|
-| `nilGradient` | radial gradient | nil sentinel circles |
-| `nodeRedGradient` | radial gradient | red node circles |
-| `nodeBlackGradient` | radial gradient | black node circles |
-| `nilShadow` | drop shadow filter | nil circles |
-| `nodeRedGlow` | glow filter | red node circles |
-| `nodeShadow` | drop shadow filter | black node circles |
-| `edgeShadow` | drop shadow filter | edge line groups |
-| `arrowGradient` | linear gradient | arrowhead polygon fill |
-| `arrowhead` | marker | edge `markerEnd` |
+| `nodeHighlightRing` | drop shadow filter | the ring `<circle>` in `NodeBody` |
 
-All numeric values in `SvgDefs` are in grid units. The arrowhead marker uses
-`markerUnits="userSpaceOnUse"` so its dimensions are in the same grid unit
-coordinate space as the rest of the SVG.
+All other visual resources (node gradients and filters) are defined inline
+per-node inside `NodeBody`, because they are parameterized by `colorT` and
+`highlightT` and must update on every animation frame.
 
----
+### `colors.ts`
 
-## Snapshot system
-
-`Snapshot`, `SnapshotHistory`, and `SnapshotType` implement a step-through
-replay system for tree operations. Each snapshot records:
-
-- The tree root at that moment (`RBTNode | null`)
-- The operation type (e.g., `"inserted_left"`, `"rotated_right"`)
-- The operand nodes involved, as `{ value, red }` pairs
-
-`SnapshotHistory` collects snapshots for a single operation into an ordered
-list. The `Controls` component's step buttons (`⏮ ◀ ▶ ⏭`) are wired to
-navigate this history — the callbacks are currently stubs in `TreeVisualizer`
-pending the animation implementation.
-
-`SnapshotType` extends `RBT/OperationType` with one extra value — `"new"` —
-for the moment a node object is first created before insertion.
-
----
-
-## Supporting files
+A single `colors` object typed `as const`. Every hex color string in the
+codebase lives here — no inline color literals in components.
 
 ### `constants.ts`
 
 ```typescript
-SLOT = 40          // pixels per grid unit — only used for SVG width/height
-NODE_RADIUS = 0.55 // 22px / 40px — circle radius for internal nodes
-NIL_RADIUS = 0.2   // 8px  / 40px — circle radius for nil sentinels
-PADDING = 1        // 40px / 40px — grid units of whitespace around the tree
-LEVEL_GAP = 2      // vertical slots between a node and its children (level doubling)
+SLOT       = 40    // px per grid unit — only used for SVG width
+NODE_RADIUS = 0.55 // 22px — circle radius for internal nodes
+PADDING    = 2     // 80px — grid units of whitespace around the tree
+LEVEL_GAP  = 2     // vertical distance from a node to its children
 ```
 
-### `colors.ts`
+---
 
-A single `colors` object typed `as const`. All color strings live here — no
-inline hex values in components. Referenced by `SvgDefs` for gradient stops
-and filter flood colors, and by `Edge` and `NodeBody` for stroke and fill.
+## `components/`
+
+See [`components/README.md`](components/README.md) for details on `TreeNode`,
+`NodeBody`, and `Edge`.

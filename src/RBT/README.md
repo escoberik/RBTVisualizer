@@ -1,4 +1,98 @@
-# Layout Grid System
+# RBT — Red-Black Tree
+
+This package is a self-contained Red-Black Tree implementation. It has no
+dependency on React, the DOM, or any rendering layer. Its only external surface
+is a generic callback (`LogFn`) that the visualizer wires up to record
+snapshots.
+
+---
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `types.ts` | Shared types: `EventType`, `LogFn`, `NodePosition` |
+| `Node.ts` | Abstract base class for all nodes |
+| `InternalNode.ts` | Concrete node — holds a value and a color bit |
+| `SentinelNode.ts` | Singleton NIL sentinel — always black, self-referential |
+| `Tree.ts` | Insertion algorithm with rotation and recolor fixup |
+| `Grid.ts` | `GridLine` and `Grid` layout primitives |
+| `Layout.ts` | Two-pass slot-position computation |
+
+---
+
+## Node hierarchy
+
+```
+Node<T>  (abstract)
+├── InternalNode<T>   — a real tree node with .value and mutable color
+└── SentinelNode<T>   — the shared NIL node (singleton)
+```
+
+### `Node<T>`
+
+Abstract base. Defines `left`, `right`, `parent` (all `Node<T>`), `isNil`,
+`isRed`, `paintRed()`, `paintBlack()`, and two derived helpers:
+
+- `isBlack` — `!isRed`
+- `sibling` — the other child of `this.parent`
+- `uncle` — `this.parent.sibling`
+
+### `InternalNode<T>`
+
+Starts red on construction (RBT invariant: newly inserted nodes are red).
+Children and parent are initialized to the sentinel. `value` is public and
+read-only after construction.
+
+### `SentinelNode<T>`
+
+A singleton (`SentinelNode.getInstance<T>()`). Its `left`, `right`, and
+`parent` all point back to itself, so sentinel-boundary checks never need
+null guards — any navigation through a sentinel stays at the sentinel.
+`isNil` is `true`, `isRed` is permanently `false`, and `paintRed` is a no-op.
+
+---
+
+## Tree
+
+`Tree<T>` implements insertion with the standard RBT fixup. The constructor
+optionally accepts a `logFn: LogFn<Node<T>>` callback; every significant
+operation fires an event through it.
+
+### Event sequence for an insertion
+
+```
+COMPARE_LEFT | COMPARE_RIGHT    — repeated for each node visited during BST descent
+INSERT                          — node placed in the tree
+ROTATE_LEFT | ROTATE_RIGHT      — zero or more rotations during fixup
+RECOLOR_UNCLE_RED               — uncle-is-red case: recolor parent, uncle, grandparent
+RECOLOR_AFTER_ROTATION          — post-rotation recolor of parent and grandparent
+RECOLOR_ROOT                    — root forced black at the end (if needed)
+```
+
+Each event callback receives `(event, root, subject)`:
+
+- `root` — the current tree root (may change after a rotation)
+- `subject` — the node most relevant to this event (the pivot for rotations,
+  the grandparent for uncle-recolor, the new parent for post-rotation recolor)
+
+### Fixup cases
+
+| Condition | Action |
+|-----------|--------|
+| Node is root | Done (root is repainted black at the very end) |
+| Parent is black | Done |
+| Uncle is red | Recolor parent + uncle black, grandparent red, recurse on grandparent |
+| Parent is left child, node is right child | Rotate left on parent, then fall through |
+| Parent is left child, node is left child | Rotate right on grandparent, recolor |
+| Parent is right child, node is left child | Rotate right on parent, then fall through |
+| Parent is right child, node is right child | Rotate left on grandparent, recolor |
+
+Duplicate values are silently ignored.
+
+---
+
+## Layout Grid System
 
 `Layout` is pure computation — it takes a tree of `Node<T>` objects and returns
 integer slot coordinates. It has no dependency on any rendering layer,
