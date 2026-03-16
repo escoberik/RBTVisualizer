@@ -85,7 +85,13 @@ export default function Controls({
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               handleInsert();
-              onLast(); // jump to the newly inserted state
+              onLast();
+            } else if (e.key === "Delete") {
+              handleDelete();
+              onLast();
+            } else if (e.key === "f" || e.key === "F") {
+              handleFind();
+              onLast();
             }
           }}
         />

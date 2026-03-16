@@ -70,6 +70,10 @@ html {
   line-height: 20px;
 }
 
+.controls-actions > input[type="number"] {
+  text-align: right;
+}
+
 .controls-nav > button {
   flex: 1;
   min-width: 0;
