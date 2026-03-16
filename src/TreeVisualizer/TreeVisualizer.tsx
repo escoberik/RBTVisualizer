@@ -22,14 +22,14 @@ export default function TreeVisualizer() {
   const animated = useLayoutTransition(history.get(index)!);;
 
   function insert(value: number) {
-    history.reset(tree.root, value); // snapshot "before" state; value floats in
+    history.reset(tree.root, value, "insert"); // snapshot "before" state; value floats in
     tree.insert(value);       // tree mutates; logFn appends "after" state
     setIndex(0);
     setVersion((v) => v + 1);
   }
 
   function find(value: number) {
-    history.reset(tree.root, value);
+    history.reset(tree.root, value, "find");
     const found = tree.find(value);
     if (found === null && tree.root.isNil) {
       history.appendFinal("Not found", tree.root);
