@@ -8,6 +8,7 @@ import {
 
 type ControlsProps = {
   onInsert: (value: number) => void;
+  onFind: (value: number) => void;
   onNext: () => void;
   onPrev: () => void;
   onFirst: () => void;
@@ -18,6 +19,7 @@ type ControlsProps = {
 
 export default function Controls({
   onInsert,
+  onFind,
   onNext,
   onPrev,
   onFirst,
@@ -29,13 +31,27 @@ export default function Controls({
   const [invalid, setInvalid] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function handleInsert() {
+  function parseValue(): number | null {
     const num = Number(value);
     if (value.trim() === "" || isNaN(num)) {
       setInvalid(true);
-      return;
+      return null;
     }
+    return num;
+  }
+
+  function handleInsert() {
+    const num = parseValue();
+    if (num === null) return;
     onInsert(num);
+    setValue("");
+    inputRef.current?.focus();
+  }
+
+  function handleFind() {
+    const num = parseValue();
+    if (num === null) return;
+    onFind(num);
     setValue("");
     inputRef.current?.focus();
   }
@@ -64,7 +80,7 @@ export default function Controls({
           }}
         />
         <button onClick={handleInsert}>Insert</button>
-        <button disabled={true}>Find</button>
+        <button onClick={handleFind}>Find</button>
         <button disabled={true}>Delete</button>
       </div>
       <div className="controls-nav">

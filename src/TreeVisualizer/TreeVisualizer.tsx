@@ -28,6 +28,16 @@ export default function TreeVisualizer() {
     setVersion((v) => v + 1);
   }
 
+  function find(value: number) {
+    history.reset(tree.root, value);
+    const found = tree.find(value);
+    if (found === null && tree.root.isNil) {
+      history.appendFinal("Not found", tree.root);
+    }
+    setIndex(0);
+    setVersion((v) => v + 1);
+  }
+
   function goNext() {
     setIndex((i) => Math.min(i + 1, history.length - 1));
   }
@@ -47,6 +57,7 @@ export default function TreeVisualizer() {
       <Renderer layout={animated} viewport={history.size} />
       <Controls
         onInsert={insert}
+        onFind={find}
         onNext={goNext}
         onPrev={goPrev}
         onFirst={goFirst}

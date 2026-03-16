@@ -3,6 +3,8 @@ import SentinelNode from "./SentinelNode";
 import InternalNode from "./InternalNode";
 import type { EventType, LogFn } from "./types";
 
+type FindResult<T> = { found: boolean; position: Node<T> };
+
 export default class RBTree<T> {
   root: Node<T>;
   readonly NIL: SentinelNode<T>;
@@ -12,42 +14,51 @@ export default class RBTree<T> {
     this.root = this.NIL;
   }
 
+  find(value: T): InternalNode<T> | null {
+    const { found, position } = this.findPosition(this.root, value);
+    if (!found && !position.isNil) {
+      this.log("NOT_FOUND", position as InternalNode<T>);
+    }
+    return found ? (position as InternalNode<T>) : null;
+  }
+
   insert(value: T): InternalNode<T> {
+    const { found, position } = this.findPosition(this.root, value);
+    if (found) return position as InternalNode<T>; // ignore duplicates
+
     const newNode = new InternalNode<T>(value);
-    this.insertUnder(this.root, newNode);
+    if (position.isNil) {
+      this.root = newNode;
+    } else {
+      const parent = position as InternalNode<T>;
+      if (value < parent.value) {
+        parent.left = newNode;
+      } else {
+        parent.right = newNode;
+      }
+      newNode.parent = parent;
+    }
+    this.log("INSERT", newNode);
     this.fixInsert(newNode);
     this.repaintRoot();
     return newNode;
   }
 
-  private insertUnder(parent: Node<T>, child: InternalNode<T>) {
-    if (parent.isNil) {
-      this.root = child;
-      this.log("INSERT", child);
-      return;
+  private findPosition(node: Node<T>, value: T): FindResult<T> {
+    if (node.isNil) return { found: false, position: this.NIL };
+    const n = node as InternalNode<T>;
+    if (value === n.value) {
+      this.log("FOUND", n);
+      return { found: true, position: n };
     }
-
-    const p = parent as InternalNode<T>; // safe: guarded by isNil above
-    if (child.value === p.value) return; // ignore duplicates
-
-    if (child.value < p.value) {
-      this.log("COMPARE_LEFT", p);
-      if (parent.left.isNil) {
-        parent.left = child;
-        child.parent = parent;
-        this.log("INSERT", child);
-      } else {
-        this.insertUnder(parent.left, child);
-      }
+    if (value < n.value) {
+      this.log("COMPARE_LEFT", n);
+      if (node.left.isNil) return { found: false, position: n };
+      return this.findPosition(node.left, value);
     } else {
-      this.log("COMPARE_RIGHT", p);
-      if (parent.right.isNil) {
-        parent.right = child;
-        child.parent = parent;
-        this.log("INSERT", child);
-      } else {
-        this.insertUnder(parent.right, child);
-      }
+      this.log("COMPARE_RIGHT", n);
+      if (node.right.isNil) return { found: false, position: n };
+      return this.findPosition(node.right, value);
     }
   }
 
@@ -81,7 +92,11 @@ export default class RBTree<T> {
     this.fixInsert(grandparent);
   }
 
-  private fixParentIsLeft(node: Node<T>, parent: Node<T>, grandparent: Node<T>) {
+  private fixParentIsLeft(
+    node: Node<T>,
+    parent: Node<T>,
+    grandparent: Node<T>,
+  ) {
     if (node === parent.right) {
       this.rotateLeft(parent);
       node = parent;
@@ -95,7 +110,11 @@ export default class RBTree<T> {
     this.log("RECOLOR_AFTER_ROTATION", parent as InternalNode<T>);
   }
 
-  private fixParentIsRight(node: Node<T>, parent: Node<T>, grandparent: Node<T>) {
+  private fixParentIsRight(
+    node: Node<T>,
+    parent: Node<T>,
+    grandparent: Node<T>,
+  ) {
     if (node === parent.left) {
       this.rotateRight(parent);
       node = parent;

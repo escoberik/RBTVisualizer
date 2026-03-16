@@ -15,7 +15,7 @@ snapshots.
 | `Node.ts` | Abstract base class for all nodes |
 | `InternalNode.ts` | Concrete node — holds a value and a color bit |
 | `SentinelNode.ts` | Singleton NIL sentinel — always black, self-referential |
-| `Tree.ts` | Insertion algorithm with rotation and recolor fixup |
+| `Tree.ts` | Insertion and search, with rotation and recolor fixup |
 | `Grid.ts` | `GridLine` and `Grid` layout primitives |
 | `Layout.ts` | Two-pass slot-position computation |
 
@@ -55,15 +55,39 @@ null guards — any navigation through a sentinel stays at the sentinel.
 
 ## Tree
 
-`Tree<T>` implements insertion with the standard RBT fixup. The constructor
-optionally accepts a `logFn: LogFn<Node<T>>` callback; every significant
-operation fires an event through it.
+`Tree<T>` implements insertion and search with the standard RBT fixup. The
+constructor optionally accepts a `logFn: LogFn<Node<T>>` callback; every
+significant operation fires an event through it.
+
+### Shared traversal
+
+Both `find` and `insert` use the same private `findPosition(node, value)`
+method for their BST descent. It logs `COMPARE_LEFT` or `COMPARE_RIGHT` at
+each node visited and `FOUND` when the value matches. This means insert and
+find produce identical traversal animations up to their respective terminal
+events.
+
+`findPosition` returns `{ found: boolean; position: Node<T> }`:
+
+- `found: true` — `position` is the matching `InternalNode<T>`
+- `found: false` — `position` is the parent where a new node would be inserted,
+  or `NIL` for an empty tree
+
+### Event sequence for a find
+
+```
+COMPARE_LEFT | COMPARE_RIGHT    — repeated for each node visited during BST descent
+FOUND                           — value exists in the tree (subject: the found node)
+NOT_FOUND                       — value absent; subject: last compared node
+                                  (no event fired on an empty tree — handled by the UI layer)
+```
 
 ### Event sequence for an insertion
 
 ```
 COMPARE_LEFT | COMPARE_RIGHT    — repeated for each node visited during BST descent
-INSERT                          — node placed in the tree
+FOUND                           — duplicate detected; insertion is silently skipped
+INSERT                          — new node placed in the tree
 ROTATE_LEFT | ROTATE_RIGHT      — zero or more rotations during fixup
 RECOLOR_UNCLE_RED               — uncle-is-red case: recolor parent, uncle, grandparent
 RECOLOR_AFTER_ROTATION          — post-rotation recolor of parent and grandparent

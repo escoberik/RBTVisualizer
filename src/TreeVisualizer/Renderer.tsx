@@ -51,7 +51,7 @@ export default function Renderer({
           transform={`translate(${layout.floatingNode.offset}, ${layout.floatingNode.level})`}
           opacity={layout.floatingNode.opacity}
         >
-          <NodeBody value={layout.floatingNode.value} colorT={1} highlightT={1} />
+          <NodeBody value={layout.floatingNode.value} colorT={1} highlightT={1} nodeId="float" />
         </g>
       )}
     </svg>

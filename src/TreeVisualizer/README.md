@@ -58,12 +58,21 @@ Nodes land on even slots; the odd slots between them hold the arrows.
 ### `TreeVisualizer.tsx` — root component
 
 Owns the `Tree` and `History` instances in a stable ref (never recreated on
-re-render). On each insert:
+re-render). Both operations follow the same pattern:
 
+**Insert:**
 1. Calls `history.reset(tree.root, value)` to snapshot the before-state with
-   the inserting value floating.
+   the value floating.
 2. Calls `tree.insert(value)`, which fires events through `history.append`.
 3. Resets the step index to 0 so playback starts from the beginning.
+
+**Find:**
+1. Calls `history.reset(tree.root, value)` — same setup, floating value is the
+   search target.
+2. Calls `tree.find(value)`, which fires traversal and terminal events.
+3. If the tree is empty (no events were fired), appends a final "Not found"
+   snapshot via `history.appendFinal`.
+4. Resets the step index to 0.
 
 Step navigation (first / prev / next / last) moves the index through
 `history`'s snapshot array.
@@ -72,8 +81,8 @@ Step navigation (first / prev / next / last) moves the index through
 
 `History<T>` receives `(event, root, subject)` callbacks from `RBT/Tree` and
 stores each as a `Layout<T>` with a human-readable description. It also tracks
-`_floatingValue` — the value being inserted — and injects it into `Layout` so
-the floating node animation knows which node to float.
+`_floatingValue` — the active value (being inserted or searched) — and injects
+it into `Layout` so the floating node animation knows which node to float.
 
 A stable `size` property tracks the maximum `{ width, height }` seen across all
 snapshots. `Renderer` uses this to keep the SVG viewport constant while
@@ -100,9 +109,10 @@ are ± from it. This is what keeps the viewport centered on the root across all
 steps.
 
 **Floating node:** during `COMPARE_LEFT` / `COMPARE_RIGHT` steps, a floating
-node (the value being inserted) hovers 1.5 units above the highlighted
-comparison node. If no highlight match exists (e.g., `INITIAL`), it floats to
-the left of the tree. On an empty tree it hovers at center-left.
+node (the active value — being inserted or searched) hovers 1.5 units above the
+highlighted comparison node. If no highlight match exists (e.g., `INITIAL`), it
+floats to the left of the tree. On an empty tree it hovers at center-left. At
+`FOUND`, `NOT_FOUND`, and `INSERT`, no floating node is shown.
 
 **Edges:** stored as `{ parent: T, child: T }` pairs. Positions are computed
 at render time from the animated node layouts, so edges correctly track nodes

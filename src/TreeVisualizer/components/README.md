@@ -38,23 +38,26 @@ drop shadow or glow, an optional highlight ring, and a centered text label.
 ### Props
 
 ```typescript
-{ value: number; colorT: number; highlightT: number }
+{ value: number; colorT: number; highlightT: number; nodeId?: string }
 ```
 
 - `colorT` — `0` = fully black node, `1` = fully red node. Can be any value
   in between during an animated color transition.
 - `highlightT` — `0` = normal appearance, `1` = highlighted (active step).
   Controls the specular highlight intensity and the ring visibility.
+- `nodeId` — key for the inline SVG `<defs>`. Defaults to `String(value)`.
+  The floating ghost passes `"float"` to avoid ID collisions with a same-valued
+  tree node (which can happen when searching for a value already in the tree).
 
 ### Per-node inline SVG defs
 
 Because `colorT` and `highlightT` change every animation frame, static shared
 gradients can't be used. Instead, `NodeBody` defines a `<radialGradient>` and a
-`<filter>` inline, keyed to the node's value:
+`<filter>` inline, keyed to `nodeId`:
 
 ```
-#ng-{value}   radialGradient — fill for the node circle
-#nf-{value}   filter         — drop shadow / glow
+#ng-{nodeId}   radialGradient — fill for the node circle
+#nf-{nodeId}   filter         — drop shadow / glow
 ```
 
 SVG IDs are global within the document, so these are accessible from anywhere

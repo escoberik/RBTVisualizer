@@ -21,10 +21,12 @@ export function NodeBody({
   value,
   colorT,
   highlightT,
+  nodeId = String(value),
 }: {
   value: number;
   colorT: number;
   highlightT: number;
+  nodeId?: string;
 }) {
   // Gradient stops: interpolate black↔red (colorT) and normal↔highlight (highlightT)
   const specularBlack = lerpColor(colors.nodeBlackHighlight, colors.nodeBlackHighlightSpecular, highlightT);
@@ -44,8 +46,8 @@ export function NodeBody({
   const filterDy      = lerp(0.05, 0, colorT);
   const filterStd     = lerp(0.0625, 0.1, colorT);
 
-  const gradId   = `ng-${value}`;
-  const filterId = `nf-${value}`;
+  const gradId   = `ng-${nodeId}`;
+  const filterId = `nf-${nodeId}`;
 
   return (
     <>

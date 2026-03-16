@@ -7,14 +7,16 @@ type EventType = RBTEventType | "INITIAL";
 
 const EventDescriptions: Record<EventType, string> = {
   INITIAL:                "Initial tree",
-  COMPARE_LEFT:           "Compare — go left",
-  COMPARE_RIGHT:          "Compare — go right",
   INSERT:                 "Insert node",
   ROTATE_LEFT:            "Rotate left",
   ROTATE_RIGHT:           "Rotate right",
   RECOLOR_UNCLE_RED:      "Recolor — uncle is red",
   RECOLOR_AFTER_ROTATION: "Recolor after rotation",
   RECOLOR_ROOT:           "Recolor root",
+  COMPARE_LEFT:           "Compare — go left",
+  COMPARE_RIGHT:          "Compare — go right",
+  FOUND:                  "Found",
+  NOT_FOUND:              "Not found",
 };
 
 export default class History<T> {
@@ -41,6 +43,15 @@ export default class History<T> {
     const highlightValue = (subject as InternalNode<T>).value;
     const showFloating = event === "COMPARE_LEFT" || event === "COMPARE_RIGHT";
     const layout = new Layout<T>(EventDescriptions[event], root, highlightValue, showFloating ? this._floatingValue : undefined);
+    this._layouts.push(layout);
+    this._size = {
+      width: Math.max(this._size.width, layout.size.width),
+      height: Math.max(this._size.height, layout.size.height),
+    };
+  }
+
+  appendFinal(description: string, root: Node<T>) {
+    const layout = new Layout<T>(description, root, undefined, undefined);
     this._layouts.push(layout);
     this._size = {
       width: Math.max(this._size.width, layout.size.width),
