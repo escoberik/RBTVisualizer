@@ -168,6 +168,154 @@ export default class RBTree<T> {
     this.log("ROTATE_RIGHT", pivot as InternalNode<T>);
   }
 
+  delete(value: T): boolean {
+    const { found, position } = this.findPosition(this.root, value);
+    if (!found) {
+      if (!position.isNil) {
+        this.log("NOT_FOUND", position as InternalNode<T>);
+      }
+      return false;
+    }
+    this.deleteNode(position as InternalNode<T>);
+    return true;
+  }
+
+  private minimum(node: Node<T>): InternalNode<T> {
+    let n = node as InternalNode<T>;
+    while (!n.left.isNil) n = n.left as InternalNode<T>;
+    return n;
+  }
+
+  // Splice v into u's position. Does NOT set v.parent when v is NIL
+  // (NIL is a singleton — callers track xParent explicitly).
+  private transplant(u: Node<T>, v: Node<T>) {
+    if (u.parent.isNil) {
+      this.root = v;
+    } else if (u === u.parent.left) {
+      u.parent.left = v;
+    } else {
+      u.parent.right = v;
+    }
+    if (!v.isNil) v.parent = u.parent;
+  }
+
+  private deleteNode(z: InternalNode<T>) {
+    let y: Node<T> = z;
+    let yOriginallyRed = y.isRed;
+    let x: Node<T>;
+    let xParent: Node<T>;
+
+    if (z.left.isNil) {
+      x = z.right;
+      xParent = z.parent;
+      this.transplant(z, z.right);
+      this.log("DELETE", z);
+    } else if (z.right.isNil) {
+      x = z.left;
+      xParent = z.parent;
+      this.transplant(z, z.left);
+      this.log("DELETE", z);
+    } else {
+      y = this.minimum(z.right);
+      yOriginallyRed = y.isRed;
+      x = y.right;
+
+      this.log("REPLACE_WITH_SUCCESSOR", z);
+
+      if (y.parent === z) {
+        xParent = y;
+      } else {
+        xParent = y.parent;
+        this.transplant(y, y.right);
+        y.right = z.right;
+        y.right.parent = y;
+      }
+      this.transplant(z, y);
+      y.left = z.left;
+      y.left.parent = y;
+      if (z.isRed) y.paintRed(); else y.paintBlack();
+      this.log("DELETE", y as InternalNode<T>);
+    }
+
+    if (!yOriginallyRed) {
+      this.fixDelete(x, xParent);
+    }
+  }
+
+  private fixDelete(x: Node<T>, xParent: Node<T>) {
+    while (x !== this.root && x.isBlack) {
+      if (x === xParent.left) {
+        let w = xParent.right;
+        if (w.isRed) {
+          // Case 1: sibling is red
+          w.paintBlack();
+          xParent.paintRed();
+          this.rotateLeft(xParent);
+          w = xParent.right;
+        }
+        if (w.left.isBlack && w.right.isBlack) {
+          // Case 2: sibling has two black children
+          w.paintRed();
+          this.log("RECOLOR_SIBLING", w as InternalNode<T>);
+          x = xParent;
+          xParent = x.parent;
+        } else {
+          if (w.right.isBlack) {
+            // Case 3: sibling's right child is black
+            w.left.paintBlack();
+            w.paintRed();
+            this.rotateRight(w);
+            w = xParent.right;
+          }
+          // Case 4: sibling's right child is red
+          this.rotateLeft(xParent);
+          if (xParent.isRed) w.paintRed(); else w.paintBlack();
+          xParent.paintBlack();
+          w.right.paintBlack();
+          this.log("RECOLOR_AFTER_ROTATION", w as InternalNode<T>);
+          x = this.root;
+          break;
+        }
+      } else {
+        let w = xParent.left;
+        if (w.isRed) {
+          // Case 1 (mirror)
+          w.paintBlack();
+          xParent.paintRed();
+          this.rotateRight(xParent);
+          w = xParent.left;
+        }
+        if (w.right.isBlack && w.left.isBlack) {
+          // Case 2 (mirror)
+          w.paintRed();
+          this.log("RECOLOR_SIBLING", w as InternalNode<T>);
+          x = xParent;
+          xParent = x.parent;
+        } else {
+          if (w.left.isBlack) {
+            // Case 3 (mirror)
+            w.right.paintBlack();
+            w.paintRed();
+            this.rotateLeft(w);
+            w = xParent.left;
+          }
+          // Case 4 (mirror)
+          this.rotateRight(xParent);
+          if (xParent.isRed) w.paintRed(); else w.paintBlack();
+          xParent.paintBlack();
+          w.left.paintBlack();
+          this.log("RECOLOR_AFTER_ROTATION", w as InternalNode<T>);
+          x = this.root;
+          break;
+        }
+      }
+    }
+    if (x.isRed) {
+      x.paintBlack();
+      this.log("RECOLOR_ABSORBED", x as InternalNode<T>);
+    }
+  }
+
   private repaintRoot() {
     if (this.root.isBlack) return;
     this.root.paintBlack();

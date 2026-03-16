@@ -15,7 +15,7 @@ snapshots.
 | `Node.ts` | Abstract base class for all nodes |
 | `InternalNode.ts` | Concrete node — holds a value and a color bit |
 | `SentinelNode.ts` | Singleton NIL sentinel — always black, self-referential |
-| `Tree.ts` | Insertion and search, with rotation and recolor fixup |
+| `Tree.ts` | Insertion, search, and deletion, with rotation and recolor fixup |
 | `Grid.ts` | `GridLine` and `Grid` layout primitives |
 | `Layout.ts` | Two-pass slot-position computation |
 
@@ -55,9 +55,9 @@ null guards — any navigation through a sentinel stays at the sentinel.
 
 ## Tree
 
-`Tree<T>` implements insertion and search with the standard RBT fixup. The
-constructor optionally accepts a `logFn: LogFn<Node<T>>` callback; every
-significant operation fires an event through it.
+`Tree<T>` implements insertion, search, and deletion with the standard RBT
+fixup. The constructor optionally accepts a `logFn: LogFn<Node<T>>` callback;
+every significant operation fires an event through it.
 
 ### Shared traversal
 
@@ -94,13 +94,33 @@ RECOLOR_AFTER_ROTATION          — post-rotation recolor of parent and grandpar
 RECOLOR_ROOT                    — root forced black at the end (if needed)
 ```
 
+### Event sequence for a deletion
+
+```
+COMPARE_LEFT | COMPARE_RIGHT    — same BST descent as find/insert
+FOUND                           — target node located
+NOT_FOUND                       — value absent; subject: last compared node
+                                  (no event fired on an empty tree — handled by the UI layer)
+REPLACE_WITH_SUCCESSOR          — node has two children; fired before any pointer changes,
+                                  so both the target and its in-order successor are visible
+                                  in the snapshot; subject: node being deleted
+DELETE                          — fired after the node is spliced out; subject: the node
+                                  that was removed (0/1-child case) or the successor now
+                                  at the deleted position (2-child case)
+ROTATE_LEFT | ROTATE_RIGHT      — zero or more rotations during delete fixup
+RECOLOR_SIBLING                 — fixup Case 2: sibling painted red, double-black propagates up
+RECOLOR_AFTER_ROTATION          — fixup Case 4: recolor after the terminating rotation
+RECOLOR_ABSORBED                — fixup termination: a red node absorbs the extra black
+                                  by being painted black (no full loop needed)
+```
+
 Each event callback receives `(event, root, subject)`:
 
 - `root` — the current tree root (may change after a rotation)
 - `subject` — the node most relevant to this event (the pivot for rotations,
   the grandparent for uncle-recolor, the new parent for post-rotation recolor)
 
-### Fixup cases
+### Insert fixup cases
 
 | Condition | Action |
 |-----------|--------|
@@ -113,6 +133,31 @@ Each event callback receives `(event, root, subject)`:
 | Parent is right child, node is right child | Rotate left on grandparent, recolor |
 
 Duplicate values are silently ignored.
+
+### Delete implementation notes
+
+`deleteNode(z)` handles three structural cases:
+
+- **0 or 1 child** — transplant z's child (or NIL) into z's position; log
+  `DELETE` after the transplant so the snapshot shows the tree with z already
+  gone.
+- **2 children** — find the in-order successor `y = minimum(z.right)`; log
+  `REPLACE_WITH_SUCCESSOR` *before* any pointer changes (so both z and y are
+  visible); splice y out of its original position; move y into z's position.
+
+`fixDelete(x, xParent)` tracks the fixup parent explicitly rather than reading
+`NIL.parent`, because `NIL` is a singleton and mutating its parent would corrupt
+the sentinel. The four CLRS cases apply to both the left and right sub-problems:
+
+| Case | Condition | Action |
+|------|-----------|--------|
+| 1 | Sibling is red | Recolor + rotate to convert to Case 2/3/4 |
+| 2 | Sibling has two black children | Paint sibling red, propagate double-black upward |
+| 3 | Sibling's near child is red, far child is black | Recolor + rotate to convert to Case 4 |
+| 4 | Sibling's far child is red | Rotate, then recolor to restore black height |
+
+After the loop, if `x` is red it absorbs the extra black via `paintBlack()`,
+logged as `RECOLOR_ABSORBED`.
 
 ---
 

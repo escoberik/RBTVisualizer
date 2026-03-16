@@ -9,6 +9,7 @@ import {
 type ControlsProps = {
   onInsert: (value: number) => void;
   onFind: (value: number) => void;
+  onDelete: (value: number) => void;
   onNext: () => void;
   onPrev: () => void;
   onFirst: () => void;
@@ -20,6 +21,7 @@ type ControlsProps = {
 export default function Controls({
   onInsert,
   onFind,
+  onDelete,
   onNext,
   onPrev,
   onFirst,
@@ -56,6 +58,14 @@ export default function Controls({
     inputRef.current?.focus();
   }
 
+  function handleDelete() {
+    const num = parseValue();
+    if (num === null) return;
+    onDelete(num);
+    setValue("");
+    inputRef.current?.focus();
+  }
+
   return (
     <div className="controls">
       <div className="controls-actions">
@@ -81,7 +91,7 @@ export default function Controls({
         />
         <button onClick={handleInsert}>Insert</button>
         <button onClick={handleFind}>Find</button>
-        <button disabled={true}>Delete</button>
+        <button onClick={handleDelete}>Delete</button>
       </div>
       <div className="controls-nav">
         <button title="First step" onClick={onFirst} disabled={isFirst}>

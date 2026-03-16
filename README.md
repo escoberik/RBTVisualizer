@@ -1,6 +1,6 @@
 # Red-Black Tree Visualizer
 
-An interactive step-by-step visualizer for Red-Black Tree operations. Insert or search for a number, then walk through every comparison, rotation, and recolor the algorithm performs — one frame at a time.
+An interactive step-by-step visualizer for Red-Black Tree operations. Insert, search for, or delete a number, then walk through every comparison, rotation, and recolor the algorithm performs — one frame at a time.
 
 **Live demo:** https://escoberik.github.io/rbtree-visualizer/
 
@@ -9,9 +9,9 @@ An interactive step-by-step visualizer for Red-Black Tree operations. Insert or 
 ## Features
 
 - Step through each event: comparisons, rotations, recolors, found/not-found
-- Insert a value or search for one — both animate the same traversal steps
+- Insert, find, or delete a value — all three animate the same traversal steps
 - Smooth animations for node movement, color transitions, and edge changes
-- Floating node that travels the search path and lands (insert) or vanishes (find)
+- Floating node that travels the search path, lands (insert), hovers (find/delete), or fades (not found / deleted)
 - Highlight ring on the active node at each step
 - Responsive — works on mobile and desktop
 
@@ -43,7 +43,7 @@ src/
 │   ├── Node.ts          # Abstract base node
 │   ├── InternalNode.ts  # Concrete tree node with value and color
 │   ├── SentinelNode.ts  # Singleton NIL sentinel
-│   ├── Tree.ts          # Insertion and search logic with event callbacks
+│   ├── Tree.ts          # Insertion, search, and deletion with event callbacks
 │   ├── Grid.ts          # Grid/GridLine layout primitives
 │   ├── Layout.ts        # Two-pass slot-position computation
 │   └── README.md        # Layout algorithm deep-dive

@@ -19,11 +19,21 @@ export default function TreeVisualizer() {
     ref.current = { history, tree };
   }
   const { tree, history } = ref.current;
-  const animated = useLayoutTransition(history.get(index)!);;
+  const animated = useLayoutTransition(history.get(index)!);
 
   function insert(value: number) {
     history.reset(tree.root, value, "insert"); // snapshot "before" state; value floats in
     tree.insert(value);       // tree mutates; logFn appends "after" state
+    setIndex(0);
+    setVersion((v) => v + 1);
+  }
+
+  function del(value: number) {
+    history.reset(tree.root, value, "delete");
+    const deleted = tree.delete(value);
+    if (!deleted && tree.root.isNil) {
+      history.appendFinal("Not found", tree.root);
+    }
     setIndex(0);
     setVersion((v) => v + 1);
   }
@@ -58,6 +68,7 @@ export default function TreeVisualizer() {
       <Controls
         onInsert={insert}
         onFind={find}
+        onDelete={del}
         onNext={goNext}
         onPrev={goPrev}
         onFirst={goFirst}

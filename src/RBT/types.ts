@@ -8,7 +8,11 @@ export type EventType =
   | "COMPARE_LEFT"
   | "COMPARE_RIGHT"
   | "FOUND"
-  | "NOT_FOUND";
+  | "NOT_FOUND"
+  | "REPLACE_WITH_SUCCESSOR"
+  | "DELETE"
+  | "RECOLOR_SIBLING"
+  | "RECOLOR_ABSORBED";
 
 export type LogFn<T> = (event: EventType, root: T, subject: T) => void;
 

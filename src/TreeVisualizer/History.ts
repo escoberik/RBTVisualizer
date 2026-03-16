@@ -22,6 +22,10 @@ const EventDescriptions: Record<LayoutEventType, string> = {
   FOUND:                  "Found",
   FOUND_DUPLICATE:        "Found duplicate",
   NOT_FOUND:              "Not found",
+  REPLACE_WITH_SUCCESSOR: "Replace with successor",
+  DELETE:                 "Delete node",
+  RECOLOR_SIBLING:        "Recolor sibling",
+  RECOLOR_ABSORBED:       "Absorb extra black",
 };
 
 export default class History<T> {
@@ -31,7 +35,7 @@ export default class History<T> {
   private _size: { width: number; height: number } = { width: 0, height: 0 };
   // Value currently being inserted or searched — carried into layouts as the floating node.
   private _floatingValue: T | undefined;
-  private _mode: "insert" | "find" = "find";
+  private _mode: "insert" | "find" | "delete" = "find";
 
   get size() {
     return this._size;
@@ -51,7 +55,8 @@ export default class History<T> {
     const layoutEvent: LayoutEventType =
       event === "FOUND" && this._mode === "insert" ? "FOUND_DUPLICATE" : event;
     const showFloating = layoutEvent === "COMPARE_LEFT" || layoutEvent === "COMPARE_RIGHT"
-      || layoutEvent === "FOUND" || layoutEvent === "FOUND_DUPLICATE";
+      || layoutEvent === "FOUND" || layoutEvent === "FOUND_DUPLICATE"
+      || layoutEvent === "REPLACE_WITH_SUCCESSOR";
     const layout = new Layout<T>(EventDescriptions[layoutEvent], root, highlightValue, showFloating ? this._floatingValue : undefined);
     this._layouts.push(layout);
     this._size = {
@@ -69,7 +74,7 @@ export default class History<T> {
     };
   }
 
-  reset(root: Node<T>, floatingValue?: T, mode: "insert" | "find" = "find") {
+  reset(root: Node<T>, floatingValue?: T, mode: "insert" | "find" | "delete" = "find") {
     this._floatingValue = floatingValue;
     this._mode = mode;
     const initial = new Layout<T>(EventDescriptions.INITIAL, root, undefined, floatingValue);
