@@ -1,3 +1,4 @@
+import "./style.css";
 import { useState, useRef } from "react";
 import Tree from "../RBT/Tree";
 import History from "./History";

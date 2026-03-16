@@ -1,20 +1,41 @@
 {
   "name": "rbtrees",
   "version": "1.0.0",
+  "main": "./dist/rbtree-visualizer.js",
+  "module": "./dist/rbtree-visualizer.mjs",
+  "types": "./dist/rbtree-visualizer.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/rbtree-visualizer.mjs",
+      "require": "./dist/rbtree-visualizer.js",
+      "types": "./dist/rbtree-visualizer.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "build:lib": "vite build --config vite.lib.config.ts"
   },
-  "dependencies": {
-    "@picocss/pico": "^2.1.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
   },
   "devDependencies": {
+    "@picocss/pico": "^2.1.1",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.4.5",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vite-plugin-dts": "^4.5.4"
   }
 }
