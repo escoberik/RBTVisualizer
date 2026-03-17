@@ -69,31 +69,33 @@ export default function Controls({
   return (
     <div className="controls">
       <div className="controls-actions">
-        <input
-          ref={inputRef}
-          type="number"
-          id="node-value"
-          name="node-value"
-          placeholder="Value"
-          value={value}
-          className={invalid ? "invalid" : ""}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setInvalid(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleInsert();
-              onLast();
-            } else if (e.key === "Delete") {
-              handleDelete();
-              onLast();
-            } else if (e.key === "f" || e.key === "F") {
-              handleFind();
-              onLast();
-            }
-          }}
-        />
+        <div className="controls-input-wrapper">
+          <input
+            ref={inputRef}
+            type="number"
+            id="node-value"
+            name="node-value"
+            placeholder="Value"
+            value={value}
+            className={invalid ? "invalid" : ""}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setInvalid(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleInsert();
+                onLast();
+              } else if (e.key === "Delete") {
+                handleDelete();
+                onLast();
+              } else if (e.key === "f" || e.key === "F") {
+                handleFind();
+                onLast();
+              }
+            }}
+          />
+        </div>
         <button onClick={handleInsert}>Insert</button>
         <button onClick={handleFind}>Find</button>
         <button onClick={handleDelete}>Delete</button>
