@@ -77,7 +77,6 @@ export default function Controls({
           placeholder="Value"
           value={value}
           className={invalid ? "invalid" : ""}
-          autoFocus
           onChange={(e) => {
             setValue(e.target.value);
             setInvalid(false);

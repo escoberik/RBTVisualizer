@@ -2,7 +2,7 @@
 
 An interactive step-by-step visualizer for Red-Black Tree operations. Insert, search for, or delete a number, then walk through every comparison, rotation, and recolor the algorithm performs — one frame at a time.
 
-**Live demo:** https://escoberik.github.io/rbtree-visualizer/
+**Live demo:** https://erik.escobedo.dev/rbtree-visualizer/
 
 ---
 
