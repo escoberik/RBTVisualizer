@@ -1,4 +1,4 @@
-import { colors } from "../colors";
+import { colors } from "../theme/colors";
 import { NODE_RADIUS } from "../constants";
 
 const ARROW_LEN = 0.25;

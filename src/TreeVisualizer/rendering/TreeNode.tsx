@@ -1,4 +1,4 @@
-import type { AnimatedNodeLayout } from "../useLayoutTransition";
+import type { AnimatedNodeLayout } from "./useLayoutTransition";
 import { NodeBody } from "./NodeBody";
 
 export function TreeNode({

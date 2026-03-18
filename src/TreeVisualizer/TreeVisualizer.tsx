@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
 import Tree from "../RBT/Tree";
 import History from "./History";
-import Renderer from "./Renderer";
+import Renderer from "./rendering/Renderer";
 import Controls from "./Controls";
-import { useLayoutTransition } from "./useLayoutTransition";
-import { ColorsContext } from "./ColorsContext";
-import { type ThemeProps, resolveColors } from "./theme";
+import { useLayoutTransition } from "./rendering/useLayoutTransition";
+import { ColorsContext, type ThemeProps, resolveColors } from "./theme";
 
 export default function TreeVisualizer({ theme }: { theme?: ThemeProps }) {
   const resolvedColors = resolveColors(theme);

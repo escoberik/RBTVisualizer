@@ -1,7 +1,9 @@
 import type { AnimatedLayout } from "./useLayoutTransition";
 import SvgDefs from "./SvgDefs";
-import { TreeNode, Edge, NodeBody } from "./components";
-import { SLOT, PADDING } from "./constants";
+import { TreeNode } from "./TreeNode";
+import { Edge } from "./Edge";
+import { NodeBody } from "./NodeBody";
+import { SLOT, PADDING } from "../constants";
 
 export default function Renderer({
   layout,

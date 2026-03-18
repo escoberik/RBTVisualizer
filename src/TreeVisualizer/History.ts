@@ -1,7 +1,7 @@
 import { EventType as RBTEventType } from "../RBT/types";
 import InternalNode from "../RBT/InternalNode";
 import type Node from "../RBT/Node";
-import Layout from "./Layout";
+import Layout from "./rendering/Layout";
 
 // LayoutEventType is a superset of RBTEventType. The visualizer layer can
 // introduce events that don't exist in the RBT core — either by translating

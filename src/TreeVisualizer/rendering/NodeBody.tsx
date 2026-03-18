@@ -1,4 +1,4 @@
-import { useColors } from "../ColorsContext";
+import { useColors } from "../theme/ColorsContext";
 import { NODE_RADIUS } from "../constants";
 
 function lerp(a: number, b: number, t: number): number {

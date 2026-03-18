@@ -1,6 +1,6 @@
-import InternalNode from "../RBT/InternalNode";
-import type Node from "../RBT/Node";
-import RBTLayout from "../RBT/Layout";
+import InternalNode from "../../RBT/InternalNode";
+import type Node from "../../RBT/Node";
+import RBTLayout from "../../RBT/Layout";
 
 export interface NodeLayout {
   red: boolean;
