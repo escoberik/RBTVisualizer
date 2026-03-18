@@ -1,6 +1,6 @@
 {
   "name": "rbtrees",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "./dist/rbtree-visualizer.js",
   "module": "./dist/rbtree-visualizer.mjs",
   "types": "./dist/rbtree-visualizer.d.ts",
