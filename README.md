@@ -1,6 +1,8 @@
 # Red-Black Tree Visualizer
 
-An interactive step-by-step visualizer for Red-Black Tree operations. Insert, search for, or delete a number, then walk through every comparison, rotation, and recolor the algorithm performs — one frame at a time.
+An interactive step-by-step visualizer for Red-Black Tree operations. Insert,
+search for, or delete a number, then walk through every comparison, rotation,
+and recolor the algorithm performs — one frame at a time.
 
 **Live demo:** https://erik.escobedo.dev/rbtree-visualizer/
 
@@ -11,9 +13,15 @@ An interactive step-by-step visualizer for Red-Black Tree operations. Insert, se
 - Step through each event: comparisons, rotations, recolors, found/not-found
 - Insert, find, or delete a value — all three animate the same traversal steps
 - Smooth animations for node movement, color transitions, and edge changes
-- Floating node that travels the search path, lands (insert), hovers (find/delete), or fades (not found / deleted)
+- Floating node that travels the search path, lands on insert, or fades on
+  delete
 - Highlight ring on the active node at each step
+- CSS isolation via Shadow DOM — host-page styles cannot bleed in
+- Fully themeable via `ThemeProps` (colors and font family)
+- Seed the initial tree with a fixed value list or a random count
 - Responsive — works on mobile and desktop
+
+---
 
 ## Install
 
@@ -21,36 +29,99 @@ An interactive step-by-step visualizer for Red-Black Tree operations. Insert, se
 npm install rbtrees
 ```
 
+No CSS import needed — styles are self-contained inside the Shadow DOM.
+
+---
+
 ## Usage
 
 ```tsx
 import { TreeVisualizer } from 'rbtrees'
-import 'rbtrees/style.css'
 
+// Empty tree, default theme
 export default function App() {
   return <TreeVisualizer />
 }
 ```
 
-`TreeVisualizer` is a self-contained component — no props required. It manages its own tree state and renders the full interactive UI.
+### Pre-seeded tree
+
+```tsx
+// Fixed values
+<TreeVisualizer initialValues={[15, 8, 22, 4, 11]} />
+
+// Random values
+<TreeVisualizer initialRandomCount={10} />
+```
+
+### Custom theme
+
+```tsx
+import { TreeVisualizer } from 'rbtrees'
+import type { ThemeProps } from 'rbtrees'
+
+const theme: ThemeProps = {
+  fontFamily: 'monospace',
+  colors: {
+    background: '#0d0d1a',
+    text: '#00fff5',
+    nodeBlack: '#1a0a2e',
+    nodeRed: '#ff007f',
+    nodeText: '#ffffff',
+    button: { bg: '#ff007f', text: '#0d0d1a', disabled: '#2a2a4a' },
+    input: { bg: '#0d0d1a', border: '#00fff5', text: '#00fff5' },
+  },
+}
+
+export default function App() {
+  return <TreeVisualizer theme={theme} />
+}
+```
+
+---
+
+## Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `theme` | `ThemeProps` | Custom colors and font family |
+| `initialValues` | `number[]` | Pre-insert these values on mount |
+| `initialRandomCount` | `number` | Pre-insert this many random values (1–99) on mount |
+
+If both `initialValues` and `initialRandomCount` are provided,
+`initialValues` wins.
+
+### ThemeProps
+
+All fields are optional. Omitted fields fall back to the default theme.
+
+```ts
+type ThemeProps = {
+  fontFamily?: string
+  colors?: {
+    background?: string
+    text?: string
+    nil?: string        // NIL sentinel node color
+    nodeBlack?: string  // base color for black nodes
+    nodeRed?: string    // base color for red nodes
+    nodeText?: string   // label text inside nodes
+    button?: { bg?: string; text?: string; disabled?: string }
+    input?:  { bg?: string; border?: string; text?: string }
+  }
+}
+```
+
+Highlight variants, shadows, and glow effects are derived automatically from
+`nodeBlack` and `nodeRed` using color math.
 
 ---
 
 ## Development
 
-Clone the repo and run the demo app:
-
 ```bash
 npm install
-npm run dev
-```
-
-Then open `http://localhost:5173/rbtree-visualizer/`.
-
-To build the library:
-
-```bash
-npm run build:lib   # outputs to dist/
+npm run dev       # demo app at http://localhost:5173/rbtree-visualizer/
+npm run build:lib # library build → dist/
 ```
 
 ---
@@ -63,3 +134,4 @@ npm run build:lib   # outputs to dist/
 | TypeScript | Strict typing throughout |
 | Vite | Dev server and production build |
 | SVG | All tree graphics — no canvas, no third-party chart library |
+| Shadow DOM | CSS isolation — host-page styles cannot reach inside |

@@ -34,7 +34,7 @@ width={vbWidth * SLOT}   // e.g. 10 units × 40px/unit = 400px
 ```
 
 Everything else — radii, stroke widths, font sizes, filter offsets — is a
-fraction of one grid unit. `NODE_RADIUS = 0.55` means 22 px at the default
+fraction of one grid unit. `NODE_RADIUS = 0.55` means 22px at the default
 scale. Changing `SLOT` rescales the entire visualization uniformly.
 
 ### Level doubling
@@ -55,33 +55,39 @@ Nodes land on even slots; the odd slots between them hold the arrows.
 
 ## Files
 
+### `ShadowHost.tsx` — public entry point
+
+The component exported as `TreeVisualizer` from the package. Creates a shadow
+root on a host `<div>`, injects the stylesheet into it, and portals
+`TreeVisualizer` inside. This gives the component full CSS isolation — no
+host-page styles can reach in.
+
+Theme CSS custom properties are set as inline styles on the host element via
+`buildHostStyle`, where they pierce the shadow boundary and are picked up by
+the shadow stylesheet.
+
 ### `TreeVisualizer.tsx` — root component
 
 Owns the `Tree` and `History` instances in a stable ref (never recreated on
-re-render). All three operations follow the same pattern:
+re-render). Accepts an optional seed via `initialValues` or `initialRandomCount`
+to populate the tree on mount. All three operations follow the same pattern:
 
 **Insert:**
-1. Calls `history.reset(tree.root, value, "insert")` to snapshot the
-   before-state with the value floating.
-2. Calls `tree.insert(value)`, which fires events through `history.append`.
-3. Resets the step index to 0 so playback starts from the beginning.
+1. `history.reset(tree.root, value, "insert")` — snapshot before-state
+2. `tree.insert(value)` — fires events through `history.append`
+3. Reset step index to 0
 
 **Find:**
-1. Calls `history.reset(tree.root, value, "find")` — same setup, floating
-   value is the search target.
-2. Calls `tree.find(value)`, which fires traversal and terminal events.
-3. If the tree is empty (no events were fired), appends a final "Not found"
-   snapshot via `history.appendFinal`.
-4. Resets the step index to 0.
+1. `history.reset(tree.root, value, "find")` — floating value is the target
+2. `tree.find(value)` — fires traversal and terminal events
+3. If tree is empty, `history.appendFinal("Not found", tree.root)`
+4. Reset step index to 0
 
 **Delete:**
-1. Calls `history.reset(tree.root, value, "delete")` — floating value is the
-   value to be removed.
-2. Calls `tree.delete(value)`, which fires the same traversal events as find
-   followed by delete-specific events.
-3. If the tree is empty (no events were fired), appends a final "Not found"
-   snapshot via `history.appendFinal`.
-4. Resets the step index to 0.
+1. `history.reset(tree.root, value, "delete")` — floating value is the target
+2. `tree.delete(value)` — fires traversal + delete-specific events
+3. If tree is empty, `history.appendFinal("Not found", tree.root)`
+4. Reset step index to 0
 
 Step navigation (first / prev / next / last) moves the index through
 `history`'s snapshot array.
@@ -91,8 +97,8 @@ Step navigation (first / prev / next / last) moves the index through
 `History<T>` receives `(event, root, subject)` callbacks from `RBT/Tree` and
 stores each as a `Layout<T>` with a human-readable description. It also tracks
 `_floatingValue` — the active value (being inserted, searched, or deleted) —
-and injects it into `Layout` so the floating node animation knows which node to
-float.
+and injects it into `Layout` so the floating node animation knows which node
+to float.
 
 `History` uses a `LayoutEventType` which is a superset of the RBT core's
 `EventType`. This lets the visualizer layer introduce or translate events
@@ -102,130 +108,39 @@ without touching the core:
 - `FOUND_DUPLICATE` — translated from `FOUND` when `_mode === "insert"`, so
   inserting a duplicate shows a distinct description from a plain find
 
-`_mode` (`"insert" | "find" | "delete"`) drives this translation and any
-future mode-specific event handling. A `FOUND` during delete stays as `FOUND`;
-only the insert path translates it.
+`_mode` (`"insert" | "find" | "delete"`) drives this translation. A `FOUND`
+during delete stays as `FOUND`; only the insert path translates it.
 
 The floating node is shown (`showFloating = true`) during steps where the
 active value is still in play: `COMPARE_LEFT`, `COMPARE_RIGHT`, `FOUND`,
 `FOUND_DUPLICATE`, and `REPLACE_WITH_SUCCESSOR`. It is hidden for all
-structural/recolor steps and for `DELETE`, so on the DELETE transition the
-floating ghost and the deleted node fade out together.
+structural/recolor steps and for `DELETE`, so the floating ghost and the
+deleted node fade out together.
 
-A stable `size` property tracks the maximum `{ width, height }` seen across all
-snapshots. `Renderer` uses this to keep the SVG viewport constant while
+A stable `size` property tracks the maximum `{ width, height }` seen across
+all snapshots. `Renderer` uses this to keep the SVG viewport constant while
 stepping through history, preventing layout jumps as the tree grows.
 
-### `Layout.ts` — visualization adapter
+### `Controls.tsx` — action bar
 
-`Layout<T>` wraps `RBT/Layout` and produces data structures that `Renderer`
-and `useLayoutTransition` can consume directly.
-
-**`NodeLayout`:**
-
-```typescript
-interface NodeLayout {
-  red: boolean;       // true → red node
-  highlight: boolean; // true → active node for this step
-  offset: number;     // horizontal grid coordinate (root-relative)
-  level: number;      // vertical grid coordinate (doubled)
-}
-```
-
-All offsets are **root-relative**: the root is always at offset 0, children
-are ± from it. This is what keeps the viewport centered on the root across all
-steps.
-
-**Floating node:** during `COMPARE_LEFT`, `COMPARE_RIGHT`, `FOUND`,
-`FOUND_DUPLICATE`, and `REPLACE_WITH_SUCCESSOR` steps, a floating node (the
-active value — being inserted, searched, or deleted) hovers 1.5 units above the
-highlighted node. If no highlight match exists (e.g., `INITIAL`), it floats to
-the left of the tree. On an empty tree it hovers at center-left. It is hidden
-for `INSERT`, `DELETE`, `NOT_FOUND`, and all recolor/rotation steps — so on the
-DELETE transition both the floating ghost and the deleted node fade out
-simultaneously.
-
-**Edges:** stored as `{ parent: T, child: T }` pairs. Positions are computed
-at render time from the animated node layouts, so edges correctly track nodes
-during movement.
-
-### `useLayoutTransition.ts` — animation hook
-
-Drives smooth transitions between `Layout` snapshots using
-`requestAnimationFrame`. Returns an `AnimatedLayout<T>` whose numeric fields
-are linearly interpolated between the previous and next `Layout` with an
-ease-in-out curve.
-
-**Interpolated fields per node:**
-
-| Field | From → To |
-|-------|-----------|
-| `offset` | previous position → new position |
-| `level` | previous level → new level |
-| `colorT` | `0` (black) or `1` (red) → new color value |
-| `highlightT` | `0` (normal) or `1` (highlighted) → new value |
-| `opacity` | `1 → 0` (disappearing) or `0 → 1` (appearing) |
-| `scale` | `0 → 1` for newly popped-in nodes |
-
-**Special cases:**
-
-- **Floating node landing** — when the floating node enters the tree, its tree
-  node animates from the floating position to its final slot. The separate
-  floating node is hidden for that step.
-- **Floating node lifting off** — the reverse: tree node slides to the floating
-  position; the floating node hides.
-- **Same floating value across steps** — the floating node smoothly moves
-  between its positions in consecutive layouts.
-
-**Edge interpolation:** edges that exist in both `from` and `to` layouts keep
-`opacity = 1`. Disappearing edges fade out; appearing edges fade in.
-
-When `progressRef.current >= 1` (animation complete), the hook returns a frozen
-snapshot to avoid per-frame recalculation at rest.
-
-### `Renderer.tsx` — SVG composer
-
-Sets up the SVG `viewBox` to fit the stable `viewport` size with `PADDING`
-whitespace around the tree, then renders:
-
-1. **Edges** — one `<Edge>` per `AnimatedEdge`, translated to the parent node's
-   animated position. `dx` and `dy` are computed from the difference in
-   animated offsets and levels at render time.
-2. **Tree nodes** — one `<TreeNode>` per entry in `nodeLayouts`.
-3. **Floating node** — if present, a bare `<NodeBody>` translated to the
-   floating position (always red, always highlighted).
-
-Edges are rendered before nodes so arrowheads sit beneath node circles.
-
-### `SvgDefs.tsx` — shared SVG resources
-
-Currently defines one shared filter:
-
-| ID | Type | Used by |
-|----|------|---------|
-| `nodeHighlightRing` | drop shadow filter | the ring `<circle>` in `NodeBody` |
-
-All other visual resources (node gradients and filters) are defined inline
-per-node inside `NodeBody`, because they are parameterized by `colorT` and
-`highlightT` and must update on every animation frame.
-
-### `colors.ts`
-
-A single `colors` object typed `as const`. Every hex color string in the
-codebase lives here — no inline color literals in components.
+Input + Insert/Find/Delete buttons + step navigation. Fully controlled — all
+state lives in `TreeVisualizer`. Keyboard shortcuts: `Enter` = insert,
+`Delete` = delete, `f`/`F` = find.
 
 ### `constants.ts`
 
 ```typescript
-SLOT       = 40    // px per grid unit — only used for SVG width
-NODE_RADIUS = 0.55 // 22px — circle radius for internal nodes
-PADDING    = 2     // 80px — grid units of whitespace around the tree
-LEVEL_GAP  = 2     // vertical distance from a node to its children
+SLOT        = 40    // px per grid unit — only used for SVG width
+NODE_RADIUS = 0.55  // 22px — circle radius for internal nodes
+PADDING     = 2     // 80px — grid units of whitespace around the tree
+LEVEL_GAP   = 2     // vertical distance from a node to its children
 ```
 
 ---
 
-## `components/`
+## Subfolders
 
-See [`components/README.md`](components/README.md) for details on `TreeNode`,
-`NodeBody`, and `Edge`.
+- [`theme/`](theme/README.md) — color math, theming types, CSS var bridge,
+  and the `ColorsContext` used by `NodeBody`
+- [`rendering/`](rendering/README.md) — Layout adapter, animation hook,
+  Renderer, SvgDefs, and the node/edge components
