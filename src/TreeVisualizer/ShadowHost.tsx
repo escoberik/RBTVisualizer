@@ -4,7 +4,15 @@ import { createPortal } from "react-dom";
 import TreeVisualizer from "./TreeVisualizer";
 import { type ThemeProps, buildHostStyle } from "./theme";
 
-export default function ShadowHost({ theme }: { theme?: ThemeProps } = {}) {
+export default function ShadowHost({
+  theme,
+  initialValues,
+  initialRandomCount,
+}: {
+  theme?: ThemeProps;
+  initialValues?: number[];
+  initialRandomCount?: number;
+} = {}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [container, setContainer] = useState<HTMLElement | null>(null);
 
@@ -25,7 +33,14 @@ export default function ShadowHost({ theme }: { theme?: ThemeProps } = {}) {
 
   return (
     <div ref={hostRef} style={buildHostStyle(theme)}>
-      {container && createPortal(<TreeVisualizer theme={theme} />, container)}
+      {container && createPortal(
+        <TreeVisualizer
+          theme={theme}
+          initialValues={initialValues}
+          initialRandomCount={initialRandomCount}
+        />,
+        container,
+      )}
     </div>
   );
 }

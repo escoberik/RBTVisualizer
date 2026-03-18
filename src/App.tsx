@@ -98,20 +98,20 @@ export default function App() {
 
       <div className="chaos-label">Zone 1 — Nuclear button reset + aggressive typography</div>
       <div className="chaos-zone chaos-zone-1">
-        <TreeVisualizer theme={themes.cyberpunk} />
+        <TreeVisualizer theme={themes.cyberpunk} initialRandomCount={12} />
       </div>
 
       <div className="chaos-label">Zone 2 — Flexbox destruction + hostile inputs + color invasion</div>
       <div className="chaos-zone chaos-zone-2">
-        <TreeVisualizer theme={themes.forest} />
-        <TreeVisualizer theme={themes.ocean} />
+        <TreeVisualizer theme={themes.forest} initialValues={[15, 8, 22, 4, 11, 19, 30]} />
+        <TreeVisualizer theme={themes.ocean} initialRandomCount={7} />
       </div>
 
       <div className="chaos-label">Zone 3 — Box model chaos + !important bombs</div>
       <div className="chaos-zone chaos-zone-3">
-        <TreeVisualizer theme={themes.sunset} />
-        <TreeVisualizer theme={themes.monochrome} />
-        <TreeVisualizer theme={themes.candy} />
+        <TreeVisualizer theme={themes.sunset} initialRandomCount={6} />
+        <TreeVisualizer theme={themes.monochrome} initialValues={[50, 25, 75, 10, 35, 60, 90]} />
+        <TreeVisualizer theme={themes.candy} initialRandomCount={5} />
       </div>
     </div>
   );
