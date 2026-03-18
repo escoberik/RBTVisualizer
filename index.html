@@ -3,7 +3,150 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>RB Tree Visualizer</title>
+    <title>RB Tree Visualizer — Chaos Sandbox</title>
+
+    <!--
+    ================================================================
+    CHAOS SANDBOX STYLES
+    Simulates adversarial host-page CSS to test component isolation.
+    Each zone targets a different failure mode.
+    Keep this permanently — it's a regression environment, not temp.
+    ================================================================
+    -->
+
+    <style>
+      /* ---- GLOBAL chaos (applies everywhere) ----
+         Simulates a host site with aggressive resets and opinionated
+         base styles, like a poorly-configured Tailwind or Bootstrap. */
+
+      * {
+        font-family: "Comic Sans MS", cursive !important;
+        letter-spacing: 0.05em;
+      }
+
+      p {
+        margin: 0;
+        line-height: 3;
+        color: darkorange;
+        font-size: 22px;
+      }
+    </style>
+
+    <style>
+      /* ---- ZONE 1: Nuclear button reset + aggressive typography ----
+         Simulates a site that blows away all native button styles
+         and enforces its own font/size system globally. */
+
+      .chaos-zone-1 button {
+        all: unset;
+        cursor: pointer;
+        border: 3px dashed hotpink;
+        padding: 2px 6px;
+        color: hotpink;
+        font-size: 10px;
+        text-transform: uppercase;
+      }
+
+      .chaos-zone-1 input {
+        all: unset;
+        border-bottom: 3px solid lime;
+        color: lime;
+        font-size: 24px;
+        width: 60px;
+      }
+
+      .chaos-zone-1 .controls {
+        flex-direction: column;
+        background: #1a1a2e;
+        padding: 20px;
+        border-radius: 0;
+      }
+    </style>
+
+    <style>
+      /* ---- ZONE 2: Flexbox destruction + color invasion ----
+         Simulates a site whose grid/flex utilities forcibly override
+         layout on any element with display:flex. */
+
+      .chaos-zone-2 div {
+        max-width: none !important;
+      }
+
+      .chaos-zone-2 button {
+        display: block !important;
+        width: 100% !important;
+        background: linear-gradient(135deg, #ff6b6b, #feca57) !important;
+        border: none !important;
+        border-radius: 0 !important;
+        color: #000 !important;
+        font-weight: 900 !important;
+        font-size: 18px !important;
+        padding: 20px !important;
+        margin-bottom: 4px !important;
+        height: auto !important;
+      }
+
+      .chaos-zone-2 input {
+        background: #2d3436 !important;
+        border: 4px solid #6c5ce7 !important;
+        color: #fd79a8 !important;
+        border-radius: 20px !important;
+        padding: 0 16px !important;
+        font-size: 20px !important;
+      }
+
+      .chaos-zone-2 .controls-actions,
+      .chaos-zone-2 .controls-nav {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 2px !important;
+      }
+    </style>
+
+    <style>
+      /* ---- ZONE 3: Box model chaos + !important bombs ----
+         Simulates a site with box-sizing:content-box everywhere,
+         padding/margin resets on everything, and z-index wars. */
+
+      .chaos-zone-3 * {
+        box-sizing: content-box !important;
+        margin: 8px !important;
+        padding: 8px !important;
+        border: 1px dotted rgba(0, 255, 255, 0.3) !important;
+      }
+
+      .chaos-zone-3 button {
+        background: #0a0a0a !important;
+        color: #00ff41 !important;
+        border: 1px solid #00ff41 !important;
+        font-family: monospace !important;
+        font-size: 13px !important;
+        text-shadow: 0 0 8px #00ff41 !important;
+        box-shadow: 0 0 6px #00ff41 inset !important;
+        height: auto !important;
+        line-height: normal !important;
+      }
+
+      .chaos-zone-3 input {
+        background: #0a0a0a !important;
+        color: #00ff41 !important;
+        border: 1px solid #00ff41 !important;
+        font-family: monospace !important;
+        box-shadow: 0 0 6px #00ff41 inset !important;
+        height: auto !important;
+      }
+
+      .chaos-zone-3 .visualizer {
+        border: 2px solid cyan !important;
+        transform: skewX(-1deg) !important;
+        opacity: 0.9 !important;
+      }
+
+      .chaos-zone-3 .controls {
+        display: block !important;
+        column-count: 2 !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

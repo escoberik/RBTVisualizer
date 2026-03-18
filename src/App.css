@@ -9,8 +9,29 @@ html {
   align-items: center;
   padding: 25px 16px;
   box-sizing: border-box;
+  gap: 48px;
 }
 
-.visualizer {
-  background-color: var(--pico-card-background-color);
+/* --- Chaos sandbox layout --- */
+.chaos-label {
+  font-size: 11px;
+  font-family: monospace;
+  opacity: 0.5;
+  align-self: flex-start;
+  margin-bottom: -36px;
+}
+
+.chaos-zone {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  outline: 2px dashed rgba(255, 0, 0, 0.25);
+  padding: 16px;
+}
+
+.chaos-zone > * {
+  flex: 1 1 300px;
+  min-width: 0;
 }

@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
-      include: ["src/index.ts", "src/TreeVisualizer", "src/RBT"],
+      include: ["src/vite-env.d.ts", "src/index.ts", "src/TreeVisualizer", "src/RBT"],
       rollupTypes: true,
       tsconfigPath: "./tsconfig.json",
     }),

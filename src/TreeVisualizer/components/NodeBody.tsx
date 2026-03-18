@@ -1,4 +1,4 @@
-import { colors } from "../colors";
+import { useColors } from "../ColorsContext";
 import { NODE_RADIUS } from "../constants";
 
 function lerp(a: number, b: number, t: number): number {
@@ -28,6 +28,7 @@ export function NodeBody({
   highlightT: number;
   nodeId?: string;
 }) {
+  const colors = useColors();
   // Gradient stops: interpolate black↔red (colorT) and normal↔highlight (highlightT)
   const specularBlack = lerpColor(colors.nodeBlackHighlight, colors.nodeBlackHighlightSpecular, highlightT);
   const specularRed   = lerpColor(colors.nodeRedHighlight,   colors.nodeRedHighlightSpecular,   highlightT);
@@ -90,6 +91,7 @@ export function NodeBody({
         fill={colors.nodeText}
         fontSize={0.35}
         fontWeight="800"
+        letterSpacing={0}
       >
         {value}
       </text>

@@ -1,5 +1,24 @@
-:root {
+:host {
+  display: block;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* --- Theming variables ---
+     CSS custom properties pierce the Shadow DOM boundary, so these can be
+     overridden from outside. Fallbacks chain to Pico CSS vars where available,
+     then to hardcoded defaults. */
   --color-nil: #6b7280;
+  --color-bg: var(--pico-card-background-color, #21222c);
+  --color-text: var(--pico-color, #e2e8f0);
+
+  --color-btn-bg: var(--pico-primary-background, #2563eb);
+  --color-btn-border: var(--pico-primary-border-color, #1d4ed8);
+  --color-btn-text: var(--pico-primary-inverse, #ffffff);
+  --color-btn-disabled-bg: var(--color-nil);
+  --color-btn-disabled-border: var(--color-nil);
+
+  --color-input-bg: var(--pico-form-element-background-color, #1e1e2e);
+  --color-input-border: var(--pico-form-element-border-color, #44475a);
+  --color-input-text: var(--pico-color, #e2e8f0);
 
   /* Animation durations — keep in sync with ANIM constants in Renderer.tsx */
   --anim-node-settle: 800ms;
@@ -7,12 +26,15 @@
   --anim-edge-fade-delay: 800ms;
 }
 
+/* --- Layout --- */
+
 .visualizer {
   width: 100%;
-  max-width: 900px;
   border-radius: 8px;
   padding: 25px 16px;
   box-sizing: border-box;
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 .tree-svg {
@@ -23,16 +45,14 @@
   transition: width 0.3s ease;
 }
 
+/* --- Controls --- */
+
 .controls {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   width: 100%;
   margin-top: 10px;
-}
-
-.controls input.invalid {
-  outline: 2px solid red;
 }
 
 .controls-actions,
@@ -49,15 +69,7 @@
 .controls-actions > button,
 .controls-input-wrapper {
   flex: 1;
-  font-size: 16px;
-  margin: 0;
-  white-space: nowrap;
-  height: 50px;
-  line-height: 20px;
-}
-
-.controls-actions > input[type="number"] {
-  text-align: right;
+  min-width: 0;
 }
 
 .controls-input-wrapper > input {
@@ -67,21 +79,26 @@
   background: none;
   outline: none;
   font-size: inherit;
-  font-family: inherit;
+  font-family: var(--font-family);
   color: inherit;
 }
 
 .controls-nav > button {
   flex: 1;
   min-width: 0;
-  display: flex;
+}
+
+/* --- Buttons --- */
+
+button {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 0;
+  padding: 0 16px;
   height: 50px;
   font-size: 16px;
-  font-family: inherit;
+  font-family: var(--font-family);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -93,9 +110,13 @@
   transition: opacity 0.15s ease;
 }
 
-.controls-nav > button:disabled {
-  background-color: var(--color-nil);
-  border-color: var(--color-nil);
+button:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+button:disabled {
+  background-color: var(--color-btn-disabled-bg);
+  border-color: var(--color-btn-disabled-border);
   cursor: default;
   opacity: 1;
 }
@@ -105,11 +126,10 @@
 input[type="number"] {
   display: inline-block;
   margin: 0;
-  padding: 0 6px 0 12px;
+  padding: 0 12px;
   height: 50px;
-  min-height: 50px;
   font-size: 16px;
-  font-family: inherit;
+  font-family: var(--font-family);
   text-align: center;
   box-sizing: border-box;
   border-radius: 4px;
@@ -117,6 +137,13 @@ input[type="number"] {
   background-color: var(--color-input-bg);
   color: var(--color-input-text);
   outline: none;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 input[type="number"].invalid {
@@ -128,6 +155,7 @@ input[type="number"].invalid {
 p {
   margin: 0 0 8px;
   font-size: 14px;
+  font-family: var(--font-family);
   color: var(--color-text);
   min-height: 1.5em;
 }
@@ -148,6 +176,8 @@ p {
   opacity: 0;
   animation: fadeIn var(--anim-edge-fade) ease var(--anim-edge-fade-delay) forwards;
 }
+
+/* --- Responsive --- */
 
 @media (max-width: 600px) {
   .controls-actions > button,

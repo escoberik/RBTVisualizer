@@ -1,12 +1,14 @@
-import "./style.css";
 import { useState, useRef } from "react";
 import Tree from "../RBT/Tree";
 import History from "./History";
 import Renderer from "./Renderer";
 import Controls from "./Controls";
 import { useLayoutTransition } from "./useLayoutTransition";
+import { ColorsContext } from "./ColorsContext";
+import { type ThemeProps, resolveColors } from "./theme";
 
-export default function TreeVisualizer() {
+export default function TreeVisualizer({ theme }: { theme?: ThemeProps }) {
+  const resolvedColors = resolveColors(theme);
   const [index, setIndex] = useState(0);
   const [, setVersion] = useState(0);
 
@@ -23,8 +25,8 @@ export default function TreeVisualizer() {
   const animated = useLayoutTransition(history.get(index)!);
 
   function insert(value: number) {
-    history.reset(tree.root, value, "insert"); // snapshot "before" state; value floats in
-    tree.insert(value);       // tree mutates; logFn appends "after" state
+    history.reset(tree.root, value, "insert");
+    tree.insert(value);
     setIndex(0);
     setVersion((v) => v + 1);
   }
@@ -63,20 +65,22 @@ export default function TreeVisualizer() {
   }
 
   return (
-    <div className="visualizer">
-      <p>{animated.description}</p>
-      <Renderer layout={animated} viewport={history.size} />
-      <Controls
-        onInsert={insert}
-        onFind={find}
-        onDelete={del}
-        onNext={goNext}
-        onPrev={goPrev}
-        onFirst={goFirst}
-        onLast={goLast}
-        isFirst={index === 0}
-        isLast={index === history.length - 1}
-      />
-    </div>
+    <ColorsContext.Provider value={resolvedColors}>
+      <div className="visualizer">
+        <p>{animated.description}</p>
+        <Renderer layout={animated} viewport={history.size} />
+        <Controls
+          onInsert={insert}
+          onFind={find}
+          onDelete={del}
+          onNext={goNext}
+          onPrev={goPrev}
+          onFirst={goFirst}
+          onLast={goLast}
+          isFirst={index === 0}
+          isLast={index === history.length - 1}
+        />
+      </div>
+    </ColorsContext.Provider>
   );
 }

@@ -1,2 +1,6 @@
-export { default } from "./TreeVisualizer/TreeVisualizer";
-export { default as TreeVisualizer } from "./TreeVisualizer/TreeVisualizer";
+// ShadowHost wraps TreeVisualizer in a shadow DOM for CSS isolation. We export
+// it as TreeVisualizer here to keep the public API stable — consumers embed it
+// as <TreeVisualizer /> without needing to know about the shadow DOM machinery.
+export { default } from "./TreeVisualizer/ShadowHost";
+export { default as TreeVisualizer } from "./TreeVisualizer/ShadowHost";
+export type { ThemeProps } from "./TreeVisualizer/theme";
