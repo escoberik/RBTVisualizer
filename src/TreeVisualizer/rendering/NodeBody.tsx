@@ -91,6 +91,7 @@ export function NodeBody({
         fill={colors.nodeText}
         fontSize={0.35}
         fontWeight="800"
+        fontStyle="normal"
         letterSpacing={0}
       >
         {value}

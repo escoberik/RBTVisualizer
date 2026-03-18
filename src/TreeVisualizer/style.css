@@ -70,6 +70,7 @@
 .controls-input-wrapper {
   flex: 1;
   min-width: 0;
+  padding: 0;
 }
 
 .controls-input-wrapper > input {
@@ -148,6 +149,13 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"].invalid {
   outline: 2px solid red;
+}
+
+/* --- SVG text --- */
+
+text {
+  font-family: var(--font-family);
+  font-style: normal;
 }
 
 /* --- Description text --- */
