@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import Tree from "../RBT/Tree";
 import History from "./History";
 import Renderer from "./rendering/Renderer";
@@ -95,9 +95,32 @@ export default function TreeVisualizer({
     setIndex(history.length - 1);
   }
 
+  function reset() {
+    const newHistory = new History<number>();
+    const newTree = new Tree<number>(newHistory.append.bind(newHistory));
+    newHistory.reset(newTree.root);
+    ref.current = { tree: newTree, history: newHistory };
+    setIndex(0);
+    setVersion((v) => v + 1);
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goPrev();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goNext();
+    } else if (e.key === "r" || e.key === "R") {
+      reset();
+    }
+  }
+
   return (
     <ColorsContext.Provider value={resolvedColors}>
-      <div className="visualizer">
+      {/* tabIndex makes the container focusable so onKeyDown receives events
+          from anywhere within this instance, not from other instances. */}
+      <div className="visualizer" tabIndex={0} onKeyDown={handleKeyDown}>
         <p>{animated.description}</p>
         <Renderer layout={animated} viewport={history.size} />
         <Controls
