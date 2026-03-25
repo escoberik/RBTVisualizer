@@ -1,5 +1,8 @@
 # Red-Black Tree Visualizer
 
+[![npm](https://img.shields.io/npm/v/rbtrees)](https://www.npmjs.com/package/rbtrees)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 An interactive step-by-step visualizer for Red-Black Tree operations. Insert,
 search for, or delete a number, then walk through every comparison, rotation,
 and recolor the algorithm performs — one frame at a time.
@@ -91,6 +94,9 @@ export default function App() {
 If both `initialValues` and `initialRandomCount` are provided,
 `initialValues` wins.
 
+Node labels support values up to **99999**. Values beyond that will
+overflow the node circle.
+
 ### ThemeProps
 
 All fields are optional. Omitted fields fall back to the default theme.
@@ -113,6 +119,20 @@ type ThemeProps = {
 
 Highlight variants, shadows, and glow effects are derived automatically from
 `nodeBlack` and `nodeRed` using color math.
+
+---
+
+## Keyboard shortcuts
+
+Click the visualizer to focus it, then:
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Insert the entered value |
+| `f` | Find the entered value |
+| `Delete` | Delete the entered value |
+| `←` `→` | Step backward / forward |
+| `r` | Reset (clear the tree) |
 
 ---
 

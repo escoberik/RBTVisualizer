@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type KeyboardEvent } from "react";
+import { useState, useRef, type KeyboardEvent } from "react";
 import Tree from "../RBT/Tree";
 import History from "./History";
 import Renderer from "./rendering/Renderer";
@@ -44,16 +44,6 @@ export default function TreeVisualizer({
   }
   const { tree, history } = ref.current;
   const animated = useLayoutTransition(history.get(index)!);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (initialValues?.some((v) => v > 99)) {
-      console.warn(
-        "[TreeVisualizer] initialValues contains numbers > 99. " +
-          "Node labels may overflow.",
-      );
-    }
-  }, []);
 
   function insert(value: number) {
     history.reset(tree.root, value, "insert");
