@@ -110,7 +110,12 @@ export default function TreeVisualizer({
     <ColorsContext.Provider value={resolvedColors}>
       {/* tabIndex makes the container focusable so onKeyDown receives events
           from anywhere within this instance, not from other instances. */}
-      <div className="visualizer" tabIndex={0} onKeyDown={handleKeyDown}>
+      <div
+        className="visualizer"
+        tabIndex={0}
+        aria-label="Red-Black Tree Visualizer"
+        onKeyDown={handleKeyDown}
+      >
         <p role="status" aria-live="polite">
           <span>{animated.description}</span>
           {history.length > 1 && (

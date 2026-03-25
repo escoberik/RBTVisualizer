@@ -35,7 +35,13 @@ export default function Controls({
 
   function parseValue(): number | null {
     const num = Number(value);
-    if (value.trim() === "" || isNaN(num) || num > 99999) {
+    if (
+      value.trim() === "" ||
+      isNaN(num) ||
+      !Number.isInteger(num) ||
+      num < 1 ||
+      num > 99999
+    ) {
       setInvalid(true);
       return null;
     }

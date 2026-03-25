@@ -1,5 +1,6 @@
 # Red-Black Tree Visualizer
 
+[![CI](https://github.com/escoberik/RBTVisualizer/actions/workflows/ci.yml/badge.svg)](https://github.com/escoberik/RBTVisualizer/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/rbtrees)](https://www.npmjs.com/package/rbtrees)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -94,8 +95,8 @@ export default function App() {
 If both `initialValues` and `initialRandomCount` are provided,
 `initialValues` wins.
 
-Node labels support values up to **99999**. Values beyond that will
-overflow the node circle.
+Node values must be integers in the range **1–99999**. Values outside
+that range are rejected by the input.
 
 ### ThemeProps
 
