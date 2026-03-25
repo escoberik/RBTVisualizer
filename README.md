@@ -4,7 +4,7 @@ An interactive step-by-step visualizer for Red-Black Tree operations. Insert,
 search for, or delete a number, then walk through every comparison, rotation,
 and recolor the algorithm performs — one frame at a time.
 
-**Live demo:** https://erik.escobedo.dev/rbtree-visualizer/
+**Live demo:** https://rbtrees-escoberik.vercel.app
 
 ---
 
@@ -120,7 +120,7 @@ Highlight variants, shadows, and glow effects are derived automatically from
 
 ```bash
 npm install
-npm run dev       # demo app at http://localhost:5173/rbtree-visualizer/
+npm run dev       # demo app at http://localhost:5173/
 npm run build:lib # library build → dist/
 ```
 
