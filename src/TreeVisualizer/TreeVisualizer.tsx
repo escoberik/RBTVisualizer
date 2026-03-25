@@ -9,7 +9,7 @@ import { ColorsContext, type ThemeProps, resolveColors } from "./theme";
 function generateRandom(count: number): number[] {
   const values = new Set<number>();
   while (values.size < count) {
-    values.add(Math.floor(Math.random() * 99) + 1);
+    values.add(Math.floor(Math.random() * 999) + 1);
   }
   return [...values];
 }
