@@ -3,20 +3,6 @@ import TreeVisualizer from "./TreeVisualizer/ShadowHost";
 import type { ThemeProps } from "./TreeVisualizer/theme";
 
 const themes: Record<string, ThemeProps> = {
-  cyberpunk: {
-    fontFamily: "monospace",
-    colors: {
-      background: "#0d0d1a",
-      text: "#00fff5",
-      nil: "#2a2a4a",
-      nodeBlack: "#1a0a2e",
-      nodeRed: "#ff007f",
-      nodeText: "#ffffff",
-      button: { bg: "#ff007f", text: "#0d0d1a", disabled: "#2a2a4a" },
-      input:  { bg: "#0d0d1a", border: "#00fff5", text: "#00fff5" },
-    },
-  },
-
   forest: {
     fontFamily: "Georgia, serif",
     colors: {
@@ -98,7 +84,7 @@ export default function App() {
 
       <div className="chaos-label">Zone 1 — Nuclear button reset + aggressive typography</div>
       <div className="chaos-zone chaos-zone-1">
-        <TreeVisualizer theme={themes.cyberpunk} initialRandomCount={12} />
+        <TreeVisualizer initialRandomCount={12} />
       </div>
 
       <div className="chaos-label">Zone 2 — Flexbox destruction + hostile inputs + color invasion</div>

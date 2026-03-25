@@ -1,10 +1,11 @@
-import { colors } from "../theme/colors";
+import { useColors } from "../theme/ColorsContext";
 import { NODE_RADIUS } from "../constants";
 
 const ARROW_LEN = 0.25;
 const ARROW_WING = 0.225;
 
 export function Edge({ dx, dy }: { dx: number; dy: number }) {
+  const colors = useColors();
   const len = Math.sqrt(dx * dx + dy * dy);
   const ux = dx / len;
   const uy = dy / len;
