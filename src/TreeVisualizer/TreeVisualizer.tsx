@@ -111,7 +111,15 @@ export default function TreeVisualizer({
       {/* tabIndex makes the container focusable so onKeyDown receives events
           from anywhere within this instance, not from other instances. */}
       <div className="visualizer" tabIndex={0} onKeyDown={handleKeyDown}>
-        <p>{animated.description}</p>
+        <p role="status" aria-live="polite">
+          <span>{animated.description}</span>
+          {history.length > 1 && (
+            <span className="step-counter">{index + 1} / {history.length}</span>
+          )}
+        </p>
+        {animated.nodeLayouts.size === 0 && (
+          <p className="tree-empty">Insert a value to begin</p>
+        )}
         <Renderer layout={animated} viewport={history.size} />
         <Controls
           onInsert={insert}

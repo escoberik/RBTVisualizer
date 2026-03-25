@@ -37,6 +37,12 @@
   color: var(--color-text);
 }
 
+.tree-empty {
+  text-align: center;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 .tree-svg {
   display: block;
   margin: 0 auto;
@@ -166,6 +172,20 @@ p {
   font-family: var(--font-family);
   color: var(--color-text);
   min-height: 1.5em;
+}
+
+.visualizer > p {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.step-counter {
+  font-size: 12px;
+  opacity: 0.5;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* --- Animations --- */
