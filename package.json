@@ -21,7 +21,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:lib": "vite build --config vite.lib.config.ts"
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -36,6 +38,7 @@
     "react-dom": "^18.3.1",
     "typescript": "^5.4.5",
     "vite": "^5.4.1",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.1.1"
   }
 }
