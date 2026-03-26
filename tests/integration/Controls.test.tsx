@@ -22,6 +22,7 @@ function makeProps(overrides = {}) {
     onValidationError: vi.fn(),
     isFirst:           false,
     isLast:            false,
+    isEmpty:           false,
     min:               -9999,
     max:               99999,
     ...overrides,
@@ -170,6 +171,43 @@ describe("Controls keyboard shortcuts", () => {
     await user.keyboard("{Delete}");
     expect(props.onDelete).toHaveBeenCalledWith(5);
     expect(props.onLast).toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isEmpty — Find and Delete disabled; Insert still works
+// ---------------------------------------------------------------------------
+
+describe("Controls isEmpty", () => {
+  it("Find and Delete buttons are disabled when isEmpty=true", () => {
+    setup({ isEmpty: true });
+    expect(screen.getByRole("button", { name: "Find" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
+  });
+
+  it("Insert button is enabled when isEmpty=true", () => {
+    setup({ isEmpty: true });
+    expect(screen.getByRole("button", { name: "Insert" })).not.toBeDisabled();
+  });
+
+  it("f key does not call onFind when isEmpty=true", async () => {
+    const { user, props, input } = setup({ isEmpty: true });
+    await user.type(input, "5");
+    await user.keyboard("f");
+    expect(props.onFind).not.toHaveBeenCalled();
+  });
+
+  it("Delete key does not call onDelete when isEmpty=true", async () => {
+    const { user, props, input } = setup({ isEmpty: true });
+    await user.type(input, "5");
+    await user.keyboard("{Delete}");
+    expect(props.onDelete).not.toHaveBeenCalled();
+  });
+
+  it("Find and Delete buttons are enabled when isEmpty=false", () => {
+    setup({ isEmpty: false });
+    expect(screen.getByRole("button", { name: "Find" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "Delete" })).not.toBeDisabled();
   });
 });
 

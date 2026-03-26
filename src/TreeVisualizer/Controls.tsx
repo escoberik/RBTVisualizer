@@ -16,6 +16,7 @@ type ControlsProps = {
   onLast: () => void;
   isFirst: boolean;
   isLast: boolean;
+  isEmpty: boolean;
   min: number;
   max: number;
   onValidationError: (message: string | null) => void;
@@ -31,6 +32,7 @@ export default function Controls({
   onLast,
   isFirst,
   isLast,
+  isEmpty,
   min,
   max,
   onValidationError,
@@ -105,10 +107,10 @@ export default function Controls({
               if (e.key === "Enter") {
                 handleInsert();
                 onLast();
-              } else if (e.key === "Delete") {
+              } else if (e.key === "Delete" && !isEmpty) {
                 handleDelete();
                 onLast();
-              } else if (e.key === "f" || e.key === "F") {
+              } else if ((e.key === "f" || e.key === "F") && !isEmpty) {
                 handleFind();
                 onLast();
               }
@@ -116,8 +118,8 @@ export default function Controls({
           />
         </div>
         <button onClick={handleInsert}>Insert</button>
-        <button onClick={handleFind}>Find</button>
-        <button onClick={handleDelete}>Delete</button>
+        <button onClick={handleFind} disabled={isEmpty}>Find</button>
+        <button onClick={handleDelete} disabled={isEmpty}>Delete</button>
       </div>
       <div className="controls-nav">
         <button title="First step" onClick={onFirst} disabled={isFirst}>

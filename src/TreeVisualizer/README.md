@@ -125,7 +125,8 @@ stepping through history, preventing layout jumps as the tree grows.
 
 Input + Insert/Find/Delete buttons + step navigation. Fully controlled — all
 state lives in `TreeVisualizer`. Keyboard shortcuts: `Enter` = insert,
-`Delete` = delete, `f`/`F` = find.
+`Delete` = delete, `f`/`F` = find. Find and Delete are disabled (button and
+hotkey) when `isEmpty` is true — i.e., when the tree has no nodes.
 
 ### `constants.ts`
 

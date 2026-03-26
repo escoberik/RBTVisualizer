@@ -196,6 +196,7 @@ export default function TreeVisualizer({
           min={min}
           max={max}
           onValidationError={setValidationError}
+          isEmpty={tree.root.isNil}
         />
       </div>
     </ColorsContext.Provider>

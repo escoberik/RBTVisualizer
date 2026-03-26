@@ -133,8 +133,8 @@ Click the visualizer to focus it, then:
 | Key | Action |
 |-----|--------|
 | `Enter` | Insert the entered value |
-| `f` | Find the entered value |
-| `Delete` | Delete the entered value |
+| `f` | Find the entered value (disabled when tree is empty) |
+| `Delete` | Delete the entered value (disabled when tree is empty) |
 | `←` `→` | Step backward / forward |
 | `r` `r` | Reset (press twice to confirm — clears the tree) |
 
