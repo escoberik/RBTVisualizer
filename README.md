@@ -136,7 +136,7 @@ Click the visualizer to focus it, then:
 | `f` | Find the entered value |
 | `Delete` | Delete the entered value |
 | `←` `→` | Step backward / forward |
-| `r` | Reset (clear the tree) |
+| `r` `r` | Reset (press twice to confirm — clears the tree) |
 
 ---
 

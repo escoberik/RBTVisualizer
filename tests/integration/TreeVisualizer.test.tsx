@@ -58,16 +58,15 @@ describe("TreeVisualizer empty state", () => {
     expect(screen.getByText("Insert a value to begin")).toBeInTheDocument();
   });
 
-  it("shows 'Initial tree' as the initial description", () => {
+  it("shows 'Insert a value to begin' as the initial description", () => {
     setup();
-    expect(screen.getByRole("status")).toHaveTextContent("Initial tree");
+    expect(screen.getByRole("status")).toHaveTextContent("Insert a value to begin");
   });
 
-  it("does not show a step counter before any operation", () => {
+  it("does not show step navigation before any operation", () => {
     setup();
-    // Step counter only appears when history.length > 1.
-    // "1 /" would appear in any counter of the form "1 / N".
-    expect(screen.getByRole("status").textContent).not.toMatch(/\d+ \/ \d+/);
+    // StepNav only renders when history.length > 1.
+    expect(screen.queryByLabelText(/^Step \d+$/)).not.toBeInTheDocument();
   });
 });
 
@@ -85,18 +84,20 @@ describe("TreeVisualizer insert", () => {
     expect(screen.getByText("Insert a value to begin")).toBeInTheDocument();
   });
 
-  it("shows a step counter after a button insert", async () => {
+  it("shows step navigation after a button insert", async () => {
     const { user, input, insertBtn } = setup();
     await insert(user, input, insertBtn, 42);
-    expect(screen.getByRole("status").textContent).toMatch(/\d+ \/ \d+/);
+    // At least two steps exist once an insert runs.
+    expect(screen.getByLabelText("Step 2")).toBeInTheDocument();
   });
 
-  it("step counter starts at 1 and description is 'Initial tree' at step 0", async () => {
+  it("starts at step 1 and description is 'Insert a value to begin' at step 0", async () => {
+    // Step 0 of the first insert is a snapshot of the empty tree, so the
+    // empty-state description applies even though an operation is in progress.
     const { user, input, insertBtn } = setup();
     await insert(user, input, insertBtn, 42);
-    expect(screen.getByRole("status").textContent).toMatch(
-      /^Initial tree1 \/ \d+/,
-    );
+    expect(screen.getByRole("status")).toHaveTextContent("Insert a value to begin");
+    expect(screen.getByLabelText("Step 1")).toHaveAttribute("aria-current", "step");
   });
 
   it("Enter fast-forwards to the last step — empty-state prompt gone", async () => {
@@ -122,31 +123,29 @@ describe("TreeVisualizer step navigation via buttons", () => {
     expect(screen.getByRole("status")).not.toHaveTextContent("Initial tree");
   });
 
-  it("Prev returns to 'Initial tree' from step 2", async () => {
+  it("Prev returns to the empty-state description from step 2", async () => {
     const { user, input, insertBtn, nextBtn, prevBtn } = setup();
     await insert(user, input, insertBtn, 5);
     await user.click(nextBtn);
     await user.click(prevBtn);
-    expect(screen.getByRole("status")).toHaveTextContent("Initial tree");
+    expect(screen.getByRole("status")).toHaveTextContent("Insert a value to begin");
   });
 
   it("Last jumps to the final step", async () => {
-    const { user, input, insertBtn, lastBtn, status } = setup();
+    const { user, input, insertBtn, lastBtn } = setup();
     await insert(user, input, insertBtn, 5);
     await user.click(lastBtn);
-    const text = status.textContent ?? "";
-    // Counter "N / N" — both numbers are the same
-    const match = text.match(/(\d+) \/ (\d+)/);
-    expect(match).not.toBeNull();
-    expect(match![1]).toBe(match![2]);
+    // The last dot in the step nav should be current.
+    const stepBtns = screen.getAllByRole("button", { name: /^Step \d+$/ });
+    expect(stepBtns[stepBtns.length - 1]).toHaveAttribute("aria-current", "step");
   });
 
-  it("First returns to step 1 from the last step", async () => {
+  it("First returns to the empty-state description from the last step", async () => {
     const { user, input, insertBtn, lastBtn, firstBtn } = setup();
     await insert(user, input, insertBtn, 5);
     await user.click(lastBtn);
     await user.click(firstBtn);
-    expect(screen.getByRole("status")).toHaveTextContent("Initial tree");
+    expect(screen.getByRole("status")).toHaveTextContent("Insert a value to begin");
   });
 
   it("Prev is disabled on the first step", async () => {
@@ -168,19 +167,19 @@ describe("TreeVisualizer step navigation via buttons", () => {
 // ---------------------------------------------------------------------------
 
 describe("TreeVisualizer step navigation via keyboard", () => {
-  it("ArrowRight advances the description", async () => {
+  it("ArrowRight advances past the empty-state description", async () => {
     const { user, input, insertBtn, visualizer } = setup();
     await insert(user, input, insertBtn, 5);
     fireEvent.keyDown(visualizer, { key: "ArrowRight" });
-    expect(screen.getByRole("status")).not.toHaveTextContent("Initial tree");
+    expect(screen.getByRole("status")).not.toHaveTextContent("Insert a value to begin");
   });
 
-  it("ArrowLeft goes back after advancing", async () => {
+  it("ArrowLeft goes back to the empty-state description after advancing", async () => {
     const { user, input, insertBtn, visualizer } = setup();
     await insert(user, input, insertBtn, 5);
     fireEvent.keyDown(visualizer, { key: "ArrowRight" });
     fireEvent.keyDown(visualizer, { key: "ArrowLeft" });
-    expect(screen.getByRole("status")).toHaveTextContent("Initial tree");
+    expect(screen.getByRole("status")).toHaveTextContent("Insert a value to begin");
   });
 });
 
@@ -189,18 +188,43 @@ describe("TreeVisualizer step navigation via keyboard", () => {
 // ---------------------------------------------------------------------------
 
 describe("TreeVisualizer reset", () => {
-  it("r key clears the tree and restores the empty-state prompt", async () => {
+  it("first r press arms reset — tree is not cleared yet", async () => {
     const { user, input, insertBtn, visualizer } = setup();
     await insert(user, input, insertBtn, 5);
+    await user.click(screen.getByTitle("Last step"));
+    fireEvent.keyDown(visualizer, { key: "r" });
+    // Tree still has nodes; empty-state prompt is absent
+    expect(
+      screen.queryByText("Insert a value to begin"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("second r press confirms and clears the tree", async () => {
+    const { user, input, insertBtn, visualizer } = setup();
+    await insert(user, input, insertBtn, 5);
+    fireEvent.keyDown(visualizer, { key: "r" });
     fireEvent.keyDown(visualizer, { key: "r" });
     expect(screen.getByText("Insert a value to begin")).toBeInTheDocument();
   });
 
-  it("R (uppercase) also resets", async () => {
+  it("R (uppercase) works for both arm and confirm", async () => {
     const { user, input, insertBtn, visualizer } = setup();
     await insert(user, input, insertBtn, 5);
     fireEvent.keyDown(visualizer, { key: "R" });
+    fireEvent.keyDown(visualizer, { key: "R" });
     expect(screen.getByText("Insert a value to begin")).toBeInTheDocument();
+  });
+
+  it("any other key disarms reset without clearing the tree", async () => {
+    const { user, input, insertBtn, visualizer } = setup();
+    await insert(user, input, insertBtn, 5);
+    await user.click(screen.getByTitle("Last step"));
+    fireEvent.keyDown(visualizer, { key: "r" });
+    fireEvent.keyDown(visualizer, { key: "ArrowLeft" }); // disarms
+    fireEvent.keyDown(visualizer, { key: "r" });          // arms again, no reset
+    expect(
+      screen.queryByText("Insert a value to begin"),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -216,9 +240,9 @@ describe("TreeVisualizer initialValues prop", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("starts at step 1 with no step counter (single initial snapshot)", () => {
+  it("starts with no step navigation (single initial snapshot)", () => {
     setup({ initialValues: [15, 8, 22] });
     // history.reset() after seeding collapses everything to one snapshot
-    expect(screen.getByRole("status").textContent).not.toMatch(/\d+ \/ \d+/);
+    expect(screen.queryByLabelText(/^Step \d+$/)).not.toBeInTheDocument();
   });
 });

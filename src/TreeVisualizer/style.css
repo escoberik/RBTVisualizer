@@ -35,12 +35,10 @@
   box-sizing: border-box;
   background-color: var(--color-bg);
   color: var(--color-text);
-}
-
-.tree-empty {
-  text-align: center;
-  opacity: 0.45;
-  pointer-events: none;
+  /* Explicit font-family on the shadow root's top-level element so all
+     descendants inherit from here, blocking any font that bled in from
+     the host page via CSS inheritance across the shadow boundary. */
+  font-family: var(--font-family);
 }
 
 .tree-svg {
@@ -174,18 +172,198 @@ p {
   min-height: 1.5em;
 }
 
-.visualizer > p {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+.tree-container {
+  position: relative;
+  padding-top: 36px;
+  padding-bottom: 44px;
 }
 
-.step-counter {
-  font-size: 12px;
-  opacity: 0.5;
-  white-space: nowrap;
+/* --- Floating overlays --- */
+
+/* Shared pill base */
+.step-tooltip,
+.quick-actions,
+.step-nav {
+  position: absolute;
+  background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+
+.step-tooltip,
+.quick-actions {
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+}
+
+/* Description bubble — top left */
+.step-tooltip {
+  top: 6px;
+  left: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 13px;
+  max-width: calc(55% - 12px);
+  pointer-events: none;
+  /* override global p styles */
+  margin: 0;
+  min-height: 0;
+}
+
+.step-tooltip-error {
+  font-size: 11px;
+  /* color set inline via useColors() */
+}
+
+/* Quick actions panel — top right */
+.quick-actions {
+  top: 6px;
+  right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  pointer-events: none;
+  opacity: 0.12;
+  transition: opacity 0.25s;
+}
+
+/* Fully visible when tree has focus */
+.visualizer:focus-within .quick-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Fade on hover/touch to signal non-interactivity */
+.visualizer:focus-within .quick-actions:hover,
+.visualizer:focus-within .quick-actions:active {
+  opacity: 0.12;
+}
+
+/* Tree-action shortcuts (Enter/f/Del) only work when the input has
+   focus, so hide that group — and its separator — otherwise. The group
+   is collapsed (display:none) so it takes no space. */
+.quick-actions-tree-group {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.visualizer:has(input:focus) .quick-actions-tree-group {
+  display: flex;
+}
+
+.quick-actions-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.45;
+  margin-bottom: 2px;
+}
+
+.quick-actions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.quick-actions-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.quick-actions-list li span {
+  text-transform: uppercase;
+}
+
+.quick-actions-sep {
+  height: 1px;
+  background: currentColor;
+  opacity: 0.2;
+}
+
+/* Step nav — bottom center */
+.step-nav {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 20px;
+  padding: 4px 8px;
+  max-width: calc(100% - 32px);
+  overflow: hidden;
+}
+
+.step-nav-dot {
+  /* Reset global button styles */
+  appearance: none;
+  border: none;
+  padding: 0;
+  /* All dots occupy the same box; scale drives the size difference so
+     neighbours don't shift when the current dot grows/shrinks. */
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  background: color-mix(in srgb, var(--color-text) 35%, var(--color-bg));
+  border-radius: 50%;
+  cursor: pointer;
   flex-shrink: 0;
+  transform: scale(0.625);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.step-nav-dot--current {
+  background: var(--color-text);
+  transform: scale(1);
+}
+
+.step-nav-dot:hover:not(.step-nav-dot--current) {
+  background: color-mix(in srgb, var(--color-text) 60%, var(--color-bg));
+}
+
+/* Key cap badges */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-text) 35%, transparent);
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: inherit;
+  font-style: normal;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--color-text) 25%, transparent);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Armed reset state — amber warning pulse on the R keycap */
+.kbd--armed {
+  background: color-mix(in srgb, #f59e0b 30%, transparent);
+  border-color: color-mix(in srgb, #f59e0b 70%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, #f59e0b 40%, transparent);
+  color: #f59e0b;
+  animation: kbd-arm-pulse 0.45s ease-in-out infinite alternate;
+}
+
+@keyframes kbd-arm-pulse {
+  from { opacity: 0.55; }
+  to   { opacity: 1; }
 }
 
 /* --- Animations --- */

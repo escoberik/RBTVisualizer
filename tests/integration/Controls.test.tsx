@@ -12,17 +12,18 @@ import Controls from "../../src/TreeVisualizer/Controls";
 function makeProps(overrides = {}) {
   // prettier-ignore
   return {
-    onInsert: vi.fn(),
-    onFind:   vi.fn(),
-    onDelete: vi.fn(),
-    onNext:   vi.fn(),
-    onPrev:   vi.fn(),
-    onFirst:  vi.fn(),
-    onLast:   vi.fn(),
-    isFirst:  false,
-    isLast:   false,
-    min:      -9999,
-    max:      99999,
+    onInsert:          vi.fn(),
+    onFind:            vi.fn(),
+    onDelete:          vi.fn(),
+    onNext:            vi.fn(),
+    onPrev:            vi.fn(),
+    onFirst:           vi.fn(),
+    onLast:            vi.fn(),
+    onValidationError: vi.fn(),
+    isFirst:           false,
+    isLast:            false,
+    min:               -9999,
+    max:               99999,
     ...overrides,
   };
 }
@@ -160,6 +161,14 @@ describe("Controls keyboard shortcuts", () => {
     await user.type(input, "5");
     await user.keyboard("F");
     expect(props.onFind).toHaveBeenCalledWith(5);
+    expect(props.onLast).toHaveBeenCalled();
+  });
+
+  it("Delete key calls onDelete and onLast", async () => {
+    const { user, props, input } = setup();
+    await user.type(input, "5");
+    await user.keyboard("{Delete}");
+    expect(props.onDelete).toHaveBeenCalledWith(5);
     expect(props.onLast).toHaveBeenCalled();
   });
 });

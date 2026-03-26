@@ -18,6 +18,7 @@ type ControlsProps = {
   isLast: boolean;
   min: number;
   max: number;
+  onValidationError: (message: string | null) => void;
 };
 
 export default function Controls({
@@ -32,23 +33,30 @@ export default function Controls({
   isLast,
   min,
   max,
+  onValidationError,
 }: ControlsProps) {
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function parseValue(): number | null {
-    const num = Number(value);
-    if (
-      value.trim() === "" ||
-      isNaN(num) ||
-      !Number.isInteger(num) ||
-      num < min ||
-      num > max
-    ) {
+    if (value.trim() === "") {
       setInvalid(true);
+      onValidationError("Enter a value");
       return null;
     }
+    const num = Number(value);
+    if (isNaN(num) || !Number.isInteger(num)) {
+      setInvalid(true);
+      onValidationError("Whole numbers only");
+      return null;
+    }
+    if (num < min || num > max) {
+      setInvalid(true);
+      onValidationError(`Must be ${min} – ${max}`);
+      return null;
+    }
+    onValidationError(null);
     return num;
   }
 
@@ -91,6 +99,7 @@ export default function Controls({
             onChange={(e) => {
               setValue(e.target.value);
               setInvalid(false);
+              onValidationError(null);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {

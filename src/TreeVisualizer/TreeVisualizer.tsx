@@ -1,8 +1,11 @@
-import { useState, useRef, type KeyboardEvent } from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import Tree from "../RBT/Tree";
 import History from "./History";
 import Renderer from "./rendering/Renderer";
 import Controls from "./Controls";
+import StepTooltip from "./StepTooltip";
+import QuickActions from "./QuickActions";
+import StepNav from "./StepNav";
 import { useLayoutTransition } from "./rendering/useLayoutTransition";
 import { ColorsContext, type ThemeProps, resolveColors } from "./theme";
 import { VALUE_MIN, VALUE_MAX } from "./constants";
@@ -31,6 +34,15 @@ export default function TreeVisualizer({
   const resolvedColors = resolveColors(theme);
   const [index, setIndex] = useState(0);
   const [, setVersion] = useState(0);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [resetArmed, setResetArmed] = useState(false);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current !== null) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
 
   // Tree and History live in a ref, not state: they are mutable objects that
   // manage their own internal state. React never needs to diff them — a plain
@@ -52,7 +64,8 @@ export default function TreeVisualizer({
     ref.current = { history, tree };
   }
   const { tree, history } = ref.current;
-  const animated = useLayoutTransition(history.get(index)!);
+  const currentSnapshot = history.get(index)!;
+  const animated = useLayoutTransition(currentSnapshot, history.generation);
 
   function insert(value: number) {
     history.reset(tree.root, value, "insert");
@@ -100,18 +113,44 @@ export default function TreeVisualizer({
     newHistory.reset(newTree.root);
     ref.current = { tree: newTree, history: newHistory };
     setIndex(0);
+    setValidationError(null);
     setVersion((v) => v + 1);
+  }
+
+  function armReset() {
+    setResetArmed(true);
+    resetTimerRef.current = setTimeout(() => {
+      setResetArmed(false);
+      resetTimerRef.current = null;
+    }, 1500);
+  }
+
+  function disarmReset() {
+    if (resetTimerRef.current !== null) {
+      clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    }
+    setResetArmed(false);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
+      disarmReset();
       goPrev();
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
+      disarmReset();
       goNext();
     } else if (e.key === "r" || e.key === "R") {
-      reset();
+      if (resetArmed) {
+        disarmReset();
+        reset();
+      } else {
+        armReset();
+      }
+    } else {
+      disarmReset();
     }
   }
 
@@ -125,18 +164,25 @@ export default function TreeVisualizer({
         aria-label="Red-Black Tree Visualizer"
         onKeyDown={handleKeyDown}
       >
-        <p role="status" aria-live="polite">
-          <span>{animated.description}</span>
+        <div className="tree-container">
+          <StepTooltip
+            description={
+              currentSnapshot.nodeLayouts.size === 0
+                ? "Insert a value to begin"
+                : animated.description
+            }
+            error={validationError}
+          />
+          <QuickActions resetArmed={resetArmed} />
+          <Renderer layout={animated} viewport={history.size} />
           {history.length > 1 && (
-            <span className="step-counter">
-              {index + 1} / {history.length}
-            </span>
+            <StepNav
+              index={index}
+              total={history.length}
+              onGo={setIndex}
+            />
           )}
-        </p>
-        {animated.nodeLayouts.size === 0 && (
-          <p className="tree-empty">Insert a value to begin</p>
-        )}
-        <Renderer layout={animated} viewport={history.size} />
+        </div>
         <Controls
           onInsert={insert}
           onFind={find}
@@ -149,6 +195,7 @@ export default function TreeVisualizer({
           isLast={index === history.length - 1}
           min={min}
           max={max}
+          onValidationError={setValidationError}
         />
       </div>
     </ColorsContext.Provider>

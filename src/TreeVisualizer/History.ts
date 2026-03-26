@@ -28,7 +28,12 @@ const EventDescriptions: Record<LayoutEventType, string> = {
   RECOLOR_ABSORBED:       "Absorb extra black",
 };
 
+let _nextGeneration = 0;
+
 export default class History<T> {
+  // Incremented each time a new History is constructed so callers can
+  // detect a full reset and skip the transition animation.
+  readonly generation = ++_nextGeneration;
   private _layouts: Snapshot<T>[] = [];
   // The viewBox must stay stable while stepping through history — use the
   // largest width and height across all layouts so it never shrinks mid-replay.

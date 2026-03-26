@@ -187,6 +187,7 @@ export function interpolate<T>(
 
 export function useLayoutTransition<T>(
   layout: Snapshot<T>,
+  generation: number,
   duration = 1000,
 ): AnimatedLayout<T> {
   const fromRef = useRef<Snapshot<T>>(layout);
@@ -194,6 +195,7 @@ export function useLayoutTransition<T>(
   const progressRef = useRef(1);
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  const prevGenerationRef = useRef(generation);
   const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
 
   // Detect layout change during render (ref mutation is safe — idempotent, no state).
@@ -203,9 +205,13 @@ export function useLayoutTransition<T>(
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
+    // Skip animation when the History instance itself changed (full reset) so
+    // the viewport doesn't collapse mid-interpolation causing a zoom glitch.
+    const instant = generation !== prevGenerationRef.current;
+    prevGenerationRef.current = generation;
     fromRef.current = toRef.current;
     toRef.current = layout;
-    progressRef.current = 0;
+    progressRef.current = instant ? 1 : 0;
     startTimeRef.current = null;
   }
 

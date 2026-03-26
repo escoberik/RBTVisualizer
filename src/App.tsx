@@ -32,7 +32,7 @@ const themes: Record<string, ThemeProps> = {
   },
 
   candy: {
-    fontFamily: "'Comic Sans MS', cursive",
+    fontFamily: "'Comic Sans MS', 'Chalkboard SE', cursive",
     colors: {
       background: "#fff0f8",
       text: "#7b2d8b",
