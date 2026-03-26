@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useRef } from "react";
-import type Layout from "./Layout";
-import type { FloatingNode } from "./Layout";
+import type Snapshot from "./Snapshot";
+import type { FloatingNode } from "./Snapshot";
+import { lerp } from "./math";
 
 // ─── Animated types ──────────────────────────────────────────────────────────
 
@@ -37,16 +38,12 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
 function edgeKey<T>(parent: T, child: T): string {
   return `${String(parent)}:${String(child)}`;
 }
 
 // Wrap a static layout as a fully-opaque, scale=1 AnimatedLayout.
-function freeze<T>(layout: Layout<T>): AnimatedLayout<T> {
+export function freeze<T>(layout: Snapshot<T>): AnimatedLayout<T> {
   const nodes = new Map<T, AnimatedNodeLayout>();
   for (const [value, nl] of layout.nodeLayouts) {
     nodes.set(value, {
@@ -69,9 +66,9 @@ function freeze<T>(layout: Layout<T>): AnimatedLayout<T> {
   };
 }
 
-function interpolate<T>(
-  from: Layout<T>,
-  to: Layout<T>,
+export function interpolate<T>(
+  from: Snapshot<T>,
+  to: Snapshot<T>,
   t: number,
 ): AnimatedLayout<T> {
   const nodes = new Map<T, AnimatedNodeLayout>();
@@ -188,12 +185,12 @@ function interpolate<T>(
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useLayoutTransition(
-  layout: Layout<number>,
+export function useLayoutTransition<T>(
+  layout: Snapshot<T>,
   duration = 1000,
-): AnimatedLayout<number> {
-  const fromRef = useRef<Layout<number>>(layout);
-  const toRef = useRef<Layout<number>>(layout);
+): AnimatedLayout<T> {
+  const fromRef = useRef<Snapshot<T>>(layout);
+  const toRef = useRef<Snapshot<T>>(layout);
   const progressRef = useRef(1);
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);

@@ -1,7 +1,7 @@
 import { EventType as RBTEventType } from "../RBT/types";
 import InternalNode from "../RBT/InternalNode";
 import type Node from "../RBT/Node";
-import Layout from "./rendering/Layout";
+import Snapshot from "./rendering/Snapshot";
 
 // LayoutEventType is a superset of RBTEventType. The visualizer layer can
 // introduce events that don't exist in the RBT core — either by translating
@@ -29,7 +29,7 @@ const EventDescriptions: Record<LayoutEventType, string> = {
 };
 
 export default class History<T> {
-  private _layouts: Layout<T>[] = [];
+  private _layouts: Snapshot<T>[] = [];
   // The viewBox must stay stable while stepping through history — use the
   // largest width and height across all layouts so it never shrinks mid-replay.
   private _size: { width: number; height: number } = { width: 0, height: 0 };
@@ -44,7 +44,7 @@ export default class History<T> {
     return this._layouts.length;
   }
 
-  get(index: number): Layout<T> | undefined {
+  get(index: number): Snapshot<T> | undefined {
     return this._layouts[index];
   }
 
@@ -57,7 +57,7 @@ export default class History<T> {
     const showFloating = layoutEvent === "COMPARE_LEFT" || layoutEvent === "COMPARE_RIGHT"
       || layoutEvent === "FOUND" || layoutEvent === "FOUND_DUPLICATE"
       || layoutEvent === "REPLACE_WITH_SUCCESSOR";
-    const layout = new Layout<T>(EventDescriptions[layoutEvent], root, highlightValue, showFloating ? this._floatingValue : undefined);
+    const layout = new Snapshot<T>(EventDescriptions[layoutEvent], root, highlightValue, showFloating ? this._floatingValue : undefined);
     this._layouts.push(layout);
     this._size = {
       width: Math.max(this._size.width, layout.size.width),
@@ -66,7 +66,7 @@ export default class History<T> {
   }
 
   appendFinal(description: string, root: Node<T>) {
-    const layout = new Layout<T>(description, root, undefined, undefined);
+    const layout = new Snapshot<T>(description, root, undefined, undefined);
     this._layouts.push(layout);
     this._size = {
       width: Math.max(this._size.width, layout.size.width),
@@ -77,7 +77,7 @@ export default class History<T> {
   reset(root: Node<T>, floatingValue?: T, mode: "insert" | "find" | "delete" = "find") {
     this._floatingValue = floatingValue;
     this._mode = mode;
-    const initial = new Layout<T>(EventDescriptions.INITIAL, root, undefined, floatingValue);
+    const initial = new Snapshot<T>(EventDescriptions.INITIAL, root, undefined, floatingValue);
     this._layouts = [initial];
     this._size = { width: initial.size.width, height: initial.size.height };
   }

@@ -10,12 +10,18 @@ For the coordinate system, level doubling, and pipeline overview, see
 
 ## Files
 
-### `Layout.ts`
+### `Snapshot.ts`
 
 Visualization adapter. Wraps `RBT/Layout` and produces `NodeLayout` records
 and edge pairs that `Renderer` and `useLayoutTransition` can consume directly.
 Doubles all RBT levels so there is vertical space for arrow glyphs between
 parent and child nodes.
+
+### `math.ts`
+
+Shared numeric utilities: `lerp` (linear interpolation between two numbers) and
+`lerpColor` (channel-wise interpolation between two hex colors). Used by
+`NodeBody` and `useLayoutTransition`.
 
 ### `useLayoutTransition.ts`
 

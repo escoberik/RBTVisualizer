@@ -22,10 +22,10 @@ src/
 Data flows in one direction through a pipeline:
 
 ```
-Tree<T>                 fires LogFn events during operations
-  └─ History<T>         captures each event as a Layout<T> snapshot
-       └─ Layout<T>     computes node positions + floating node
-            └─ useLayoutTransition   interpolates between layouts
+Tree<T>                    fires LogFn events during operations
+  └─ History<T>             captures each event as a Snapshot<T>
+       └─ Snapshot<T>       computes node positions + floating node
+            └─ useLayoutTransition   interpolates between snapshots
                  └─ Renderer         draws the SVG
 ```
 
@@ -130,7 +130,7 @@ only in the SVG renderer.
 
 `History<T>` is the bridge between the algorithm and the renderer.
 It holds a `LogFn` that `Tree<T>` calls during an operation, and
-converts each event into a `Layout<T>` snapshot:
+converts each event into a `Snapshot<T>`:
 
 ```
 history.reset(root, value, mode)  →  clears layouts, records initial state
@@ -159,7 +159,7 @@ to keep the focus on the tree changes.
 
 ### Animation (`useLayoutTransition`)
 
-`useLayoutTransition` receives a `Layout<T>` snapshot and returns an
+`useLayoutTransition` receives a `Snapshot<T>` and returns an
 `AnimatedLayout<T>` that interpolates between the previous and
 current layout over 1 second using a `requestAnimationFrame` loop.
 

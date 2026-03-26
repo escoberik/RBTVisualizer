@@ -1,6 +1,6 @@
 import InternalNode from "../../RBT/InternalNode";
 import type Node from "../../RBT/Node";
-import RBTLayout from "../../RBT/Layout";
+import Layout from "../../RBT/Layout";
 
 export interface NodeLayout {
   red: boolean;
@@ -20,7 +20,11 @@ export interface FloatingNode<T> {
   level: number;
 }
 
-export default class Layout<T> {
+// A single frozen moment in History: the tree's node positions, edges, and
+// optional floating node (the search cursor) as they appeared after one
+// algorithm event. History stores a sequence of Snapshots; useLayoutTransition
+// animates between consecutive ones.
+export default class Snapshot<T> {
   readonly size: { width: number; height: number };
   readonly floatingNode: FloatingNode<T> | undefined;
   private _nodeLayouts: Map<T, NodeLayout> = new Map();
@@ -41,13 +45,13 @@ export default class Layout<T> {
     floatingValue?: T,
     showNil = false,
   ) {
-    const rbtLayout = new RBTLayout(root, showNil);
-    const { width, height } = rbtLayout.size;
+    const treeLayout = new Layout(root, showNil);
+    const { width, height } = treeLayout.size;
     this.size = { width, height: height === 0 ? 0 : height * 2 - 1 };
 
     if (!root.isNil) {
-      const rootOffset = rbtLayout.getNodePosition(root as InternalNode<T>)!.offset;
-      this.floatingNode = this.build(root as InternalNode<T>, rbtLayout, highlightValue, floatingValue, showNil, rootOffset);
+      const rootOffset = treeLayout.getNodePosition(root as InternalNode<T>)!.offset;
+      this.floatingNode = this.build(root as InternalNode<T>, treeLayout, highlightValue, floatingValue, showNil, rootOffset);
       // No highlight match (e.g. INITIAL) — float to the left of the tree
       if (floatingValue !== undefined && !this.floatingNode) {
         this.floatingNode = { value: floatingValue, offset: -rootOffset - 1.5, level: 0 };
@@ -60,13 +64,13 @@ export default class Layout<T> {
 
   private build(
     node: InternalNode<T>,
-    rbtLayout: RBTLayout<T>,
+    treeLayout: Layout<T>,
     highlightValue: T | undefined,
     floatingValue: T | undefined,
     showNil: boolean,
     rootOffset: number,
   ): FloatingNode<T> | undefined {
-    const { offset, level } = rbtLayout.getNodePosition(node)!;
+    const { offset, level } = treeLayout.getNodePosition(node)!;
     const relativeOffset = offset - rootOffset;
     const nodeLevel = level * 2;
 
@@ -86,13 +90,13 @@ export default class Layout<T> {
     let leftFloating: FloatingNode<T> | undefined;
     if (!node.left.isNil) {
       this._edges.push({ parent: node.value, child: (node.left as InternalNode<T>).value });
-      leftFloating = this.build(node.left as InternalNode<T>, rbtLayout, highlightValue, floatingValue, showNil, rootOffset);
+      leftFloating = this.build(node.left as InternalNode<T>, treeLayout, highlightValue, floatingValue, showNil, rootOffset);
     }
 
     let rightFloating: FloatingNode<T> | undefined;
     if (!node.right.isNil) {
       this._edges.push({ parent: node.value, child: (node.right as InternalNode<T>).value });
-      rightFloating = this.build(node.right as InternalNode<T>, rbtLayout, highlightValue, floatingValue, showNil, rootOffset);
+      rightFloating = this.build(node.right as InternalNode<T>, treeLayout, highlightValue, floatingValue, showNil, rootOffset);
     }
 
     this._nodeLayouts.set(node.value, layout);

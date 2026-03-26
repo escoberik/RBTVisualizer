@@ -9,16 +9,16 @@ layer in this pipeline knows as little as possible about the layers below it.
 ## Pipeline overview
 
 ```
-RBT/Tree  ──(LogFn)──→  History  ──→  Layout  ──→  useLayoutTransition  ──→  Renderer  ──→  SVG
-            events        snapshots     positions       animated positions
+RBT/Tree  ──(LogFn)──→  History  ──→  Snapshot  ──→  useLayoutTransition  ──→  Renderer  ──→  SVG
+            events        snapshots        positions            animated positions
 ```
 
 1. `RBT/Tree` mutates itself and fires events through the `LogFn` callback.
-2. `History` catches those events, wraps each in a `Layout` snapshot, and
-   stores the sequence.
+2. `History` catches those events, wraps each in a `Snapshot` snapshot,
+   and stores the sequence.
 3. `TreeVisualizer` (the root component) navigates `History` by index.
 4. `useLayoutTransition` interpolates between the current and previous
-   `Layout` over 1 second using `requestAnimationFrame`.
+   `Snapshot` over 1 second using `requestAnimationFrame`.
 5. `Renderer` maps the `AnimatedLayout` to SVG elements.
 
 ---
@@ -41,7 +41,7 @@ scale. Changing `SLOT` rescales the entire visualization uniformly.
 
 `RBT/Layout` assigns each node an integer `level` starting at 0. Adjacent
 levels are 1 unit apart — not enough vertical space for arrow glyphs.
-`TreeVisualizer/Layout` doubles all levels before storing them:
+`Snapshot` doubles all levels before storing them:
 
 ```
 RBT level:  0  1  2  3  …
