@@ -4,6 +4,19 @@ import { createPortal } from "react-dom";
 import TreeVisualizer from "./TreeVisualizer";
 import { type ThemeProps, buildHostStyle } from "./theme";
 
+/**
+ * Interactive step-by-step Red-Black Tree visualizer.
+ *
+ * Renders inside a Shadow DOM so host-page styles cannot bleed in.
+ * No CSS import is needed — all styles are self-contained.
+ *
+ * @param theme        Optional color and font overrides. See
+ *                     {@link ThemeProps} for the full schema.
+ * @param initialValues  Pre-insert these values on mount.
+ *                       If both props are given, this one wins.
+ * @param initialRandomCount  Pre-insert this many random values
+ *                            (1–99) from the range 1–99999 on mount.
+ */
 export default function ShadowHost({
   theme,
   initialValues,

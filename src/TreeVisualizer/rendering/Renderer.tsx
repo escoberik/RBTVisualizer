@@ -18,8 +18,15 @@ export default function Renderer({
   // halfWidth centers the root (offset=0) in the middle of the stable viewport.
   const vbHeight = viewport.height - 1 + 2 * PADDING + 0.5;
 
+  const nodeCount = layout.nodeLayouts.size;
+  const treeLabel = nodeCount === 0
+    ? "Empty Red-Black Tree"
+    : `Red-Black Tree with ${nodeCount} node${nodeCount !== 1 ? "s" : ""}`;
+
   return (
     <svg
+      role="img"
+      aria-label={treeLabel}
       viewBox={`${-halfWidth - PADDING} ${-PADDING - 0.5} ${vbWidth} ${vbHeight}`}
       width={vbWidth * SLOT}
       className="tree-svg"
