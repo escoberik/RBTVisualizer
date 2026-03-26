@@ -3,6 +3,20 @@ import TreeVisualizer from "./TreeVisualizer/ShadowHost";
 import type { ThemeProps } from "./TreeVisualizer/theme";
 
 const themes: Record<string, ThemeProps> = {
+  cyberpunk: {
+    fontFamily: "'Courier New', monospace",
+    colors: {
+      background: "#0d0d1a",
+      text: "#00fff5",
+      nil: "#1a1a3a",
+      nodeBlack: "#0a0a2e",
+      nodeRed: "#ff007f",
+      nodeText: "#00fff5",
+      button: { bg: "#ff007f", text: "#0d0d1a", disabled: "#1a1a3a" },
+      input: { bg: "#0d0d1a", border: "#00fff5", text: "#00fff5" },
+    },
+  },
+
   forest: {
     fontFamily: "Georgia, serif",
     colors: {
@@ -17,30 +31,17 @@ const themes: Record<string, ThemeProps> = {
     },
   },
 
-  ocean: {
+  candy: {
+    fontFamily: "'Comic Sans MS', cursive",
     colors: {
-      background: "#0a1628",
-      text: "#b0d4f1",
-      nil: "#1a3a5c",
-      nodeBlack: "#0d2b4a",
-      nodeRed: "#e74c7a",
+      background: "#fff0f8",
+      text: "#7b2d8b",
+      nil: "#ddb0e8",
+      nodeBlack: "#7b2d8b",
+      nodeRed: "#ff4da6",
       nodeText: "#ffffff",
-      button: { bg: "#1a6896", text: "#ffffff", disabled: "#1a3a5c" },
-      input: { bg: "#0a1628", border: "#1a6896", text: "#b0d4f1" },
-    },
-  },
-
-  sunset: {
-    fontFamily: "'Trebuchet MS', sans-serif",
-    colors: {
-      background: "#1c0a00",
-      text: "#ffd4a0",
-      nil: "#3d1f00",
-      nodeBlack: "#2d1200",
-      nodeRed: "#ff6b00",
-      nodeText: "#fff5e0",
-      button: { bg: "#d94f00", text: "#fff5e0", disabled: "#3d1f00" },
-      input: { bg: "#1c0a00", border: "#d94f00", text: "#ffd4a0" },
+      button: { bg: "#ff4da6", text: "#ffffff", disabled: "#ddb0e8" },
+      input: { bg: "#fff0f8", border: "#ff4da6", text: "#7b2d8b" },
     },
   },
 
@@ -58,17 +59,16 @@ const themes: Record<string, ThemeProps> = {
     },
   },
 
-  candy: {
-    fontFamily: "'Comic Sans MS', cursive",
+  ocean: {
     colors: {
-      background: "#fff0f8",
-      text: "#7b2d8b",
-      nil: "#ddb0e8",
-      nodeBlack: "#7b2d8b",
-      nodeRed: "#ff4da6",
+      background: "#0a1628",
+      text: "#b0d4f1",
+      nil: "#1a3a5c",
+      nodeBlack: "#0d2b4a",
+      nodeRed: "#e74c7a",
       nodeText: "#ffffff",
-      button: { bg: "#ff4da6", text: "#ffffff", disabled: "#ddb0e8" },
-      input: { bg: "#fff0f8", border: "#ff4da6", text: "#7b2d8b" },
+      button: { bg: "#1a6896", text: "#ffffff", disabled: "#1a3a5c" },
+      input: { bg: "#0a1628", border: "#1a6896", text: "#b0d4f1" },
     },
   },
 };
@@ -94,13 +94,13 @@ export default function App() {
       </div>
       <div className="chaos-zone chaos-zone-2">
         <TreeVisualizer
-          theme={themes.forest}
+          theme={themes.cyberpunk}
           initialRandomCount={7}
           min={0}
           max={999}
         />
         <TreeVisualizer
-          theme={themes.ocean}
+          theme={themes.forest}
           initialRandomCount={7}
           min={-999}
           max={0}
@@ -111,12 +111,12 @@ export default function App() {
         Zone 3 — Box model chaos + !important bombs
       </div>
       <div className="chaos-zone chaos-zone-3">
-        <TreeVisualizer theme={themes.sunset} initialRandomCount={6} />
+        <TreeVisualizer theme={themes.candy} initialRandomCount={6} />
         <TreeVisualizer
           theme={themes.monochrome}
           initialValues={[50, 25, 75, 10, 35, 60, 90]}
         />
-        <TreeVisualizer theme={themes.candy} initialRandomCount={5} />
+        <TreeVisualizer theme={themes.ocean} initialRandomCount={5} />
       </div>
     </div>
   );
