@@ -12,6 +12,7 @@
     },
     "./style.css": "./dist/style.css"
   },
+  "type": "module",
   "license": "MIT",
   "files": [
     "dist"
