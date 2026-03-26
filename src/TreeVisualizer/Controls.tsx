@@ -16,6 +16,8 @@ type ControlsProps = {
   onLast: () => void;
   isFirst: boolean;
   isLast: boolean;
+  min: number;
+  max: number;
 };
 
 export default function Controls({
@@ -28,6 +30,8 @@ export default function Controls({
   onLast,
   isFirst,
   isLast,
+  min,
+  max,
 }: ControlsProps) {
   const [value, setValue] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -39,8 +43,8 @@ export default function Controls({
       value.trim() === "" ||
       isNaN(num) ||
       !Number.isInteger(num) ||
-      num < 1 ||
-      num > 99999
+      num < min ||
+      num > max
     ) {
       setInvalid(true);
       return null;

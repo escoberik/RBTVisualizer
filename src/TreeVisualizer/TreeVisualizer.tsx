@@ -5,11 +5,12 @@ import Renderer from "./rendering/Renderer";
 import Controls from "./Controls";
 import { useLayoutTransition } from "./rendering/useLayoutTransition";
 import { ColorsContext, type ThemeProps, resolveColors } from "./theme";
+import { VALUE_MIN, VALUE_MAX } from "./constants";
 
-function generateRandom(count: number): number[] {
+function generateRandom(count: number, min: number, max: number): number[] {
   const values = new Set<number>();
   while (values.size < count) {
-    values.add(Math.floor(Math.random() * 99999) + 1);
+    values.add(Math.floor(Math.random() * (max - min + 1)) + min);
   }
   return [...values];
 }
@@ -18,10 +19,14 @@ export default function TreeVisualizer({
   theme,
   initialValues,
   initialRandomCount,
+  min = VALUE_MIN,
+  max = VALUE_MAX,
 }: {
   theme?: ThemeProps;
   initialValues?: number[];
   initialRandomCount?: number;
+  min?: number;
+  max?: number;
 }) {
   const resolvedColors = resolveColors(theme);
   const [index, setIndex] = useState(0);
@@ -37,9 +42,10 @@ export default function TreeVisualizer({
     const history = new History<number>();
     const tree = new Tree<number>(history.append.bind(history));
 
-    const seed =
+    const seed = (
       initialValues ??
-      (initialRandomCount ? generateRandom(initialRandomCount) : []);
+      (initialRandomCount ? generateRandom(initialRandomCount, min, max) : [])
+    ).filter((v) => Number.isInteger(v) && v >= min && v <= max);
     for (const v of seed) tree.insert(v);
 
     history.reset(tree.root); // initial empty-tree snapshot, no floating node
@@ -141,6 +147,8 @@ export default function TreeVisualizer({
           onLast={goLast}
           isFirst={index === 0}
           isLast={index === history.length - 1}
+          min={min}
+          max={max}
         />
       </div>
     </ColorsContext.Provider>

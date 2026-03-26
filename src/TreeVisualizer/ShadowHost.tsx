@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import TreeVisualizer from "./TreeVisualizer";
 import { type ThemeProps, buildHostStyle } from "./theme";
+import { VALUE_MIN, VALUE_MAX } from "./constants";
 
 /**
  * Interactive step-by-step Red-Black Tree visualizer.
@@ -15,16 +16,22 @@ import { type ThemeProps, buildHostStyle } from "./theme";
  * @param initialValues  Pre-insert these values on mount.
  *                       If both props are given, this one wins.
  * @param initialRandomCount  Pre-insert this many random values
- *                            (1–99) from the range 1–99999 on mount.
+ *                            (1–99) on mount, drawn from [min, max].
+ * @param min  Minimum accepted node value (default: VALUE_MIN).
+ * @param max  Maximum accepted node value (default: VALUE_MAX).
  */
 export default function ShadowHost({
   theme,
   initialValues,
   initialRandomCount,
+  min = VALUE_MIN,
+  max = VALUE_MAX,
 }: {
   theme?: ThemeProps;
   initialValues?: number[];
   initialRandomCount?: number;
+  min?: number;
+  max?: number;
 } = {}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [container, setContainer] = useState<HTMLElement | null>(null);
@@ -51,6 +58,8 @@ export default function ShadowHost({
           theme={theme}
           initialValues={initialValues}
           initialRandomCount={initialRandomCount}
+          min={min}
+          max={max}
         />,
         container,
       )}

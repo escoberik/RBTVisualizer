@@ -21,6 +21,8 @@ function makeProps(overrides = {}) {
     onLast:   vi.fn(),
     isFirst:  false,
     isLast:   false,
+    min:      -9999,
+    max:      99999,
     ...overrides,
   };
 }
@@ -49,13 +51,21 @@ describe("Controls input validation", () => {
     const { user, props, input } = setup();
     await user.type(input, "0");
     await user.click(screen.getByRole("button", { name: "Insert" }));
-    expect(input).toHaveClass("invalid");
-    expect(props.onInsert).not.toHaveBeenCalled();
+    expect(input).not.toHaveClass("invalid");
+    expect(props.onInsert).toHaveBeenCalledWith(0);
   });
 
-  it("marks input invalid for a negative number", async () => {
+  it("accepts a negative number within range", async () => {
     const { user, props, input } = setup();
     await user.type(input, "-5");
+    await user.click(screen.getByRole("button", { name: "Insert" }));
+    expect(input).not.toHaveClass("invalid");
+    expect(props.onInsert).toHaveBeenCalledWith(-5);
+  });
+
+  it("marks input invalid for a value below -9999", async () => {
+    const { user, props, input } = setup();
+    await user.type(input, "-10000");
     await user.click(screen.getByRole("button", { name: "Insert" }));
     expect(input).toHaveClass("invalid");
     expect(props.onInsert).not.toHaveBeenCalled();

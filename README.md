@@ -86,17 +86,20 @@ export default function App() {
 
 ## Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `theme` | `ThemeProps` | Custom colors and font family |
-| `initialValues` | `number[]` | Pre-insert these values on mount |
-| `initialRandomCount` | `number` | Pre-insert this many random values (1–99) on mount |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `theme` | `ThemeProps` | — | Custom colors and font family |
+| `initialValues` | `number[]` | — | Pre-insert these values on mount |
+| `initialRandomCount` | `number` | — | Pre-insert this many random values (1–99) on mount |
+| `min` | `number` | `-9999` | Minimum accepted node value |
+| `max` | `number` | `99999` | Maximum accepted node value |
 
 If both `initialValues` and `initialRandomCount` are provided,
 `initialValues` wins.
 
-Node values must be integers in the range **1–99999**. Values outside
-that range are rejected by the input.
+Node values must be integers. The default range is **−9999 to 99999**
+— a visual constraint, not an algorithmic one (the node circle fits
+~5 characters). Pass `min`/`max` to override.
 
 ### ThemeProps
 
