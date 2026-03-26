@@ -25,7 +25,7 @@ export default function Renderer({
       className="tree-svg"
     >
       <SvgDefs />
-      {layout.edges.map((edge, i) => {
+      {layout.edges.map((edge) => {
         const parent = layout.nodeLayouts.get(edge.parent);
         const child = layout.nodeLayouts.get(edge.child);
         if (!parent || !child) return null;
@@ -33,7 +33,7 @@ export default function Renderer({
         const dy = child.level - parent.level;
         return (
           <g
-            key={i}
+            key={`${edge.parent}:${edge.child}`}
             transform={`translate(${parent.offset}, ${parent.level})`}
             opacity={edge.opacity}
           >
@@ -42,18 +42,19 @@ export default function Renderer({
         );
       })}
       {[...layout.nodeLayouts.entries()].map(([value, nodeLayout]) => (
-        <TreeNode
-          key={value}
-          value={value}
-          layout={nodeLayout}
-        />
+        <TreeNode key={value} value={value} layout={nodeLayout} />
       ))}
       {layout.floatingNode && (
         <g
           transform={`translate(${layout.floatingNode.offset}, ${layout.floatingNode.level})`}
           opacity={layout.floatingNode.opacity}
         >
-          <NodeBody value={layout.floatingNode.value} colorT={1} highlightT={1} nodeId="float" />
+          <NodeBody
+            value={layout.floatingNode.value}
+            colorT={1}
+            highlightT={1}
+            nodeId="float"
+          />
         </g>
       )}
     </svg>

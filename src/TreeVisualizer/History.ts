@@ -51,7 +51,8 @@ export default class History<T> {
   append(event: RBTEventType, root: Node<T>, subject: Node<T>) {
     // subject is always InternalNode<T> — Tree never passes the sentinel here
     const highlightValue = (subject as InternalNode<T>).value;
-    // Translate RBT events to layout events based on operation context.
+    // RBT fires FOUND for both "value exists during find" and "duplicate during
+    // insert". Translate the latter so the UI can show a distinct description.
     const layoutEvent: LayoutEventType =
       event === "FOUND" && this._mode === "insert" ? "FOUND_DUPLICATE" : event;
     const showFloating = layoutEvent === "COMPARE_LEFT" || layoutEvent === "COMPARE_RIGHT"

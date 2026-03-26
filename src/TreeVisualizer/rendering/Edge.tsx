@@ -1,8 +1,9 @@
 import { useColors } from "../theme/ColorsContext";
 import { NODE_RADIUS } from "../constants";
 
-const ARROW_LEN = 0.25;
-const ARROW_WING = 0.225;
+const ARROW_LEN   = 0.25;  // tip-to-base length of the arrowhead
+const ARROW_WING  = 0.225; // half-width of the arrowhead at its base
+const ARROW_NOTCH = 0.175; // how far the hollow notch sits behind the tip
 
 export function Edge({ dx, dy }: { dx: number; dy: number }) {
   const colors = useColors();
@@ -22,9 +23,9 @@ export function Edge({ dx, dy }: { dx: number; dy: number }) {
   // Arrow base (ARROW_LEN behind tip)
   const bx = ex - ARROW_LEN * ux;
   const by = ey - ARROW_LEN * uy;
-  // Hollow notch (0.175 behind tip)
-  const ix = ex - 0.175 * ux;
-  const iy = ey - 0.175 * uy;
+  // Hollow notch sits ARROW_NOTCH behind the tip
+  const ix = ex - ARROW_NOTCH * ux;
+  const iy = ey - ARROW_NOTCH * uy;
   const l = `${bx + ARROW_WING * px},${by + ARROW_WING * py}`;
   const r = `${bx - ARROW_WING * px},${by - ARROW_WING * py}`;
 

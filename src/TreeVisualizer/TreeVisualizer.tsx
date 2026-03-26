@@ -27,6 +27,9 @@ export default function TreeVisualizer({
   const [index, setIndex] = useState(0);
   const [, setVersion] = useState(0);
 
+  // Tree and History live in a ref, not state: they are mutable objects that
+  // manage their own internal state. React never needs to diff them — a plain
+  // setVersion() nudge is enough to trigger a re-render after each mutation.
   const ref = useRef<{ tree: Tree<number>; history: History<number> } | null>(
     null,
   );
@@ -34,9 +37,9 @@ export default function TreeVisualizer({
     const history = new History<number>();
     const tree = new Tree<number>(history.append.bind(history));
 
-    const seed = initialValues ?? (
-      initialRandomCount ? generateRandom(initialRandomCount) : []
-    );
+    const seed =
+      initialValues ??
+      (initialRandomCount ? generateRandom(initialRandomCount) : []);
     for (const v of seed) tree.insert(v);
 
     history.reset(tree.root); // initial empty-tree snapshot, no floating node
@@ -119,7 +122,9 @@ export default function TreeVisualizer({
         <p role="status" aria-live="polite">
           <span>{animated.description}</span>
           {history.length > 1 && (
-            <span className="step-counter">{index + 1} / {history.length}</span>
+            <span className="step-counter">
+              {index + 1} / {history.length}
+            </span>
           )}
         </p>
         {animated.nodeLayouts.size === 0 && (
