@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Color, lighten, darken } from "../../src/TreeVisualizer/theme/colorMath";
+import { Color, lighten, darken } from "../../../src/TreeVisualizer/theme/colorMath";
 
 describe("Color", () => {
   it("parses a mid-range hex color", () => {

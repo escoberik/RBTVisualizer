@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import RBTree from "../../src/RBT/Tree";
-import InternalNode from "../../src/RBT/InternalNode";
-import type Node from "../../src/RBT/Node";
-import type { EventType } from "../../src/RBT/types";
+import RBTree from "../../../src/RBT/Tree";
+import InternalNode from "../../../src/RBT/InternalNode";
+import type Node from "../../../src/RBT/Node";
+import type { EventType } from "../../../src/RBT/types";
 
 // ---------------------------------------------------------------------------
 // Helpers

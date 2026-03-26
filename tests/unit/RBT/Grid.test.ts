@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { GridLine, Grid } from "../../src/RBT/Grid";
+import { GridLine, Grid } from "../../../src/RBT/Grid";
 
 // ---------------------------------------------------------------------------
 // Helper

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import RBTree from "../../src/RBT/Tree";
-import History from "../../src/TreeVisualizer/History";
+import RBTree from "../../../src/RBT/Tree";
+import History from "../../../src/TreeVisualizer/History";
 
 // ---------------------------------------------------------------------------
 // Helper
