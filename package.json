@@ -1,16 +1,15 @@
 {
   "name": "rbtrees",
-  "version": "1.0.2",
-  "main": "./dist/rbtree-visualizer.js",
-  "module": "./dist/rbtree-visualizer.mjs",
+  "version": "1.0.3",
+  "main": "./dist/rbtree-visualizer.cjs",
+  "module": "./dist/rbtree-visualizer.js",
   "types": "./dist/rbtree-visualizer.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/rbtree-visualizer.mjs",
-      "require": "./dist/rbtree-visualizer.js",
+      "import": "./dist/rbtree-visualizer.js",
+      "require": "./dist/rbtree-visualizer.cjs",
       "types": "./dist/rbtree-visualizer.d.ts"
-    },
-    "./style.css": "./dist/style.css"
+    }
   },
   "type": "module",
   "license": "MIT",
@@ -25,7 +24,8 @@
     "build": "tsc && vite build",
     "build:lib": "vite build --config vite.lib.config.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build:lib"
   },
   "peerDependencies": {
     "react": ">=18",
